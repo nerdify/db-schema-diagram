@@ -1,0 +1,38 @@
+.tableContainer {
+  border: 1px solid #cbcbcb;
+  width: 160px;
+}
+
+.tableContainer table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tableContainer thead {
+  background-color: lightgray;
+}
+
+.tableContainer tbody {
+  background-color: #f4f4f4;
+  color: #404040;
+}
+
+.tableContainer thead span {
+  padding: 5px;
+  display: block;
+  width: 100%;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.row {
+  width: 100%;
+  text-align: left;
+  padding: 5px;
+  padding-left: 10px;
+  border-bottom: 1px solid #cbcbcb;
+  box-sizing: border-box;
+}
+
+.name {
+}
