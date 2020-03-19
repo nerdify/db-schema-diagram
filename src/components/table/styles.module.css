@@ -1,6 +1,9 @@
 .tableContainer {
   border: 1px solid #cbcbcb;
   width: 160px;
+  position: absolute;
+  top: 0;
+  left: 0;
 }
 
 .tableContainer table {

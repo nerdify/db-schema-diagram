@@ -1,9 +1,9 @@
 import React from "react";
 import styles from "./styles.module.css";
 
-export default function Table({ name, rows }) {
+export default function Table({ id, name, rows }) {
   return (
-    <div className={styles.tableContainer}>
+    <div id={id} className={styles.tableContainer}>
       <table>
         <thead>
           <tr>
@@ -17,7 +17,7 @@ export default function Table({ name, rows }) {
             return (
               <tr key={`${name}_${row.name}`}>
                 <td>
-                  <div className={styles.row}>
+                  <div id={`row_${name}_${row.name}`} className={styles.row}>
                     <span>{row.name}</span>
                   </div>
                 </td>

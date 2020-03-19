@@ -1,6 +1,7 @@
 import React from "react";
 import "./App.css";
 import Table from "./components/table";
+import Canvas from "./components/canvas";
 
 function App() {
   const dataInfo = {
@@ -21,9 +22,11 @@ function App() {
     ]
   };
 
+  const tables = [dataInfo];
+
   return (
     <div className="App">
-      <Table {...dataInfo} />
+      <Canvas tables={tables} />
     </div>
   );
 }

@@ -1,0 +1,6 @@
+.canvas {
+  position: relative;
+  height: 800px;
+  width: 1000px;
+  border: 1px solid red;
+}
