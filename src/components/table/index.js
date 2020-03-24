@@ -1,14 +1,19 @@
 import React from "react";
 import styles from "./styles.module.css";
 
-export default function Table({ id, name, rows }) {
+export default function Table({ name, rows }) {
+  const getType = ({ type, size = null }) => {
+    const sizeDefinition = size ? `(${size})` : "";
+    return `${type} ${sizeDefinition}`;
+  };
+
   return (
-    <div id={id} className={styles.tableContainer}>
+    <div id={`table_${name}`} className={styles.tableContainer}>
       <table>
         <thead>
           <tr>
             <td>
-              <span>{name}</span>
+              <span className={styles.tableName}>{name}</span>
             </td>
           </tr>
         </thead>
@@ -18,7 +23,8 @@ export default function Table({ id, name, rows }) {
               <tr key={`${name}_${row.name}`}>
                 <td>
                   <div id={`row_${name}_${row.name}`} className={styles.row}>
-                    <span>{row.name}</span>
+                    <span className={styles.rowName}>{row.name}</span>
+                    <small className={styles.rowType}>{getType(row)}</small>
                   </div>
                 </td>
               </tr>
