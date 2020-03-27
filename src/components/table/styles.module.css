@@ -1,5 +1,4 @@
 .tableContainer {
-  width: 160px;
   position: absolute;
   top: 0;
   left: 0;
@@ -29,7 +28,7 @@
   font-size: 15px;
 }
 
-.row {
+.column {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -37,17 +36,19 @@
   width: 100%;
   padding: 7px;
   padding-left: 10px;
-  border-bottom: 1px solid #cbcbcb;
   box-sizing: border-box;
+  border-bottom: 1px solid #cbcbcb;
+  border-left: 1px solid #cbcbcb;
+  border-right: 1px solid #cbcbcb;
 }
 
-.rowName {
+.columnName {
   color: #4a4a4a;
   font-size: 14px;
   font-weight: 500;
 }
 
-.rowType {
+.columnType {
   font-size: 13px;
   color: #969696;
   margin-left: 65px;

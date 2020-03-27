@@ -7,7 +7,7 @@ function App() {
   const dataInfo = [
     {
       name: "users",
-      rows: [
+      columns: [
         {
           name: "id",
           type: "integer"
@@ -37,7 +37,7 @@ function App() {
     },
     {
       name: "posts",
-      rows: [
+      columns: [
         {
           name: "id",
           type: "integer"
@@ -55,12 +55,93 @@ function App() {
           type: "integer"
         }
       ]
+    },
+    {
+      name: "likes",
+      columns: [
+        {
+          name: "id",
+          type: "integer"
+        },
+        {
+          name: "like_date",
+          type: "datetime"
+        },
+        {
+          name: "user_id",
+          type: "integer"
+        },
+        {
+          name: "post_id",
+          type: "integer"
+        }
+      ]
+    },
+    {
+      name: "comments",
+      columns: [
+        {
+          name: "id",
+          type: "integer"
+        },
+        {
+          name: "comment",
+          type: "text"
+        },
+        {
+          name: "user_id",
+          type: "interger"
+        }
+      ]
     }
+  ];
+
+  const refs = [
+    [
+      {
+        table: "users",
+        column: "id"
+      },
+      {
+        table: "posts",
+        column: "user_id"
+      }
+    ],
+    [
+      {
+        table: "users",
+        column: "id"
+      },
+      {
+        table: "comments",
+        column: "user_id"
+      }
+    ],
+    [
+      {
+        table: "users",
+        column: "id"
+      },
+      {
+        table: "likes",
+        column: "user_id"
+      }
+    ],
+    [
+      {
+        table: "posts",
+        column: "id"
+      },
+      {
+        table: "likes",
+        column: "post_id"
+      }
+    ]
   ];
 
   return (
     <div className="App">
-      <Canvas tables={dataInfo} />
+      <Canvas tables={dataInfo} refs={refs} />
     </div>
   );
 }

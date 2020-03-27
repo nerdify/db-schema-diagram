@@ -1,7 +1,7 @@
 import React from "react";
 import styles from "./styles.module.css";
 
-export default function Table({ name, rows }) {
+export default function Table({ name, columns }) {
   const getType = ({ type, size = null }) => {
     const sizeDefinition = size ? `(${size})` : "";
     return `${type} ${sizeDefinition}`;
@@ -9,7 +9,7 @@ export default function Table({ name, rows }) {
 
   return (
     <div id={`table_${name}`} className={styles.tableContainer}>
-      <table>
+      <table border="0" cellPadding="0" cellSpacing="0">
         <thead>
           <tr>
             <td>
@@ -18,13 +18,18 @@ export default function Table({ name, rows }) {
           </tr>
         </thead>
         <tbody>
-          {rows.map(row => {
+          {columns.map(column => {
             return (
-              <tr key={`${name}_${row.name}`}>
+              <tr key={`${name}_${column.name}`}>
                 <td>
-                  <div id={`row_${name}_${row.name}`} className={styles.row}>
-                    <span className={styles.rowName}>{row.name}</span>
-                    <small className={styles.rowType}>{getType(row)}</small>
+                  <div
+                    id={`column_${name}_${column.name}`}
+                    className={styles.column}
+                  >
+                    <span className={styles.columnName}>{column.name}</span>
+                    <small className={styles.columnType}>
+                      {getType(column)}
+                    </small>
                   </div>
                 </td>
               </tr>
