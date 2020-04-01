@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { jsPlumb } from "jsplumb";
-import ELK from "elkjs/lib/elk.bundled";
+import dagre from "dagre";
 
 import Table from "../table/";
 
@@ -9,35 +9,54 @@ import styles from "./styles.module.css";
 const setJsPlumb = (tables, refs) => {
   jsPlumb.ready(function() {
     const jsPlumbInstance = jsPlumb.getInstance();
-    jsPlumbInstance.setContainer("canvas");
 
-    jsPlumbInstance.registerConnectionTypes({
-      basic: { paintStyle: { stroke: "#cbcbcb", strokeWidth: 2 } },
-      hover: { paintStyle: { stroke: "#129be9", strokeWidth: 3 } }
-    });
+    jsPlumbInstance.batch(() => {
+      jsPlumbInstance.setContainer("canvas");
 
-    jsPlumbInstance.draggable(tables.map(table => `table_${table.name}`));
-
-    refs.forEach(([primary, foreign]) => {
-      const connect = jsPlumbInstance.connect({
-        source: `column_${primary.table}_${primary.column}`,
-        target: `column_${foreign.table}_${foreign.column}`,
-        isSource: true,
-        isTarget: true,
-        anchor: ["Right", "Left"],
-        connector: ["Flowchart", { stub: 10, gap: 1 }],
-        //connector: ["Flowchart", { stub: 30, gap: 0 }],
-        endpoints: ["Blank", "Blank"],
-        detachable: false,
-        type: "basic"
+      jsPlumbInstance.registerConnectionTypes({
+        basic: { paintStyle: { stroke: "#cbcbcb", strokeWidth: 2 } },
+        hover: {
+          paintStyle: {
+            stroke: "#129be9",
+            strokeWidth: 3
+          }
+        }
       });
 
-      connect.bind("mouseover", () => {
-        connect.setType("hover");
-      });
+      jsPlumbInstance.draggable(tables.map(table => `table_${table.name}`));
 
-      connect.bind("mouseout", () => {
-        connect.setType("basic");
+      refs.forEach(([primary, foreign]) => {
+        const sourceId = `column_${primary.table}_${primary.column}`;
+        const targetId = `column_${foreign.table}_${foreign.column}`;
+
+        const connect = jsPlumbInstance.connect({
+          source: sourceId,
+          target: targetId,
+          isSource: true,
+          isTarget: true,
+          anchor: ["Right", "Left"],
+          connector: ["Flowchart", { stub: 10, gap: 1 }],
+          //connector: ["Flowchart", { stub: 30, gap: 0 }],
+          endpoints: ["Blank", "Blank"],
+          detachable: false,
+          type: "basic"
+        });
+
+        connect.bind("mouseover", () => {
+          connect.setType("hover");
+          document.getElementById(sourceId).classList.add(styles.hoverColumn);
+          document.getElementById(targetId).classList.add(styles.hoverColumn);
+        });
+
+        connect.bind("mouseout", () => {
+          connect.setType("basic");
+          document
+            .getElementById(sourceId)
+            .classList.remove(styles.hoverColumn);
+          document
+            .getElementById(targetId)
+            .classList.remove(styles.hoverColumn);
+        });
       });
     });
   });
@@ -47,49 +66,41 @@ export default function Canvas({ tables, refs }) {
   const jsPlumbInstance = useRef();
 
   useEffect(() => {
-    const elk = new ELK();
+    const g = new dagre.graphlib.Graph();
+    g.setGraph({ directed: true });
+    g.setDefaultEdgeLabel(function() {
+      return {};
+    });
 
-    const graph = {
-      id: "root",
-      layoutOptions: { "elk.algorithm": "radial" },
-      children: tables.map(({ name, x, y }) => {
-        const definition = {
-          id: `table_${name}`,
-          width: 222,
-          height: 214
-        };
+    tables.forEach(({ name, x, y }) => {
+      const el = document.getElementById(`table_${name}`);
+      const node = {
+        label: `table_${name}`,
+        width: el.offsetWidth,
+        height: el.offsetHeight
+      };
 
-        if (x && y) {
-          definition.x = x;
-          definition.y = y;
-          definition.layoutOptions = {
-            "elk.stress.fixed": "true"
-          };
-        }
+      if (x && y) {
+        node.x = x;
+        node.y = y;
+      }
+      g.setNode(`table_${name}`, node);
+    });
 
-        return definition;
-      }),
-      edges: refs.map(([primary, foreign]) => {
-        return {
-          id: `e_${primary.table}_${foreign.table}`,
-          sources: [`table_${primary.table}`],
-          targets: [`table_${foreign.table}`]
-        };
-      })
-    };
+    refs.forEach(([foreign, primary]) => {
+      g.setEdge(`table_${foreign.table}`, `table_${primary.table}`);
+    });
 
-    elk
-      .layout(graph)
-      .then(response => {
-        response.children.forEach(child => {
-          const el = document.getElementById(child.id);
-          el.style.left = `${child.x}px`;
-          el.style.top = `${child.y}px`;
-        });
+    dagre.layout(g, { rankdir: "LR" });
 
-        setJsPlumb(tables, refs);
-      })
-      .catch(console.error);
+    g.nodes().forEach(v => {
+      const node = g.node(v);
+      const el = document.getElementById(node.label);
+      el.style.top = `${node.x}px`;
+      el.style.left = `${node.y}px`;
+    });
+
+    setJsPlumb(tables, refs);
   }, []);
 
   return (

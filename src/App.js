@@ -7,6 +7,8 @@ function App() {
   const dataInfo = [
     {
       name: "users",
+      x: 5,
+      y: 5,
       columns: [
         {
           name: "id",
@@ -93,48 +95,83 @@ function App() {
           type: "interger"
         }
       ]
+    },
+    {
+      name: "transactions",
+      columns: [
+        {
+          name: "id",
+          type: "integer"
+        },
+        {
+          name: "ref",
+          type: "string"
+        },
+        {
+          name: "amount",
+          type: "integer"
+        },
+        {
+          name: "date",
+          type: "datetime"
+        },
+        {
+          name: "user_id",
+          type: "integer"
+        }
+      ]
     }
   ];
 
   const refs = [
     [
       {
-        table: "users",
-        column: "id"
-      },
-      {
         table: "posts",
         column: "user_id"
+      },
+      {
+        table: "users",
+        column: "id"
       }
     ],
     [
-      {
-        table: "users",
-        column: "id"
-      },
       {
         table: "comments",
         column: "user_id"
-      }
-    ],
-    [
+      },
       {
         table: "users",
         column: "id"
-      },
-      {
-        table: "likes",
-        column: "user_id"
       }
     ],
     [
       {
-        table: "posts",
-        column: "id"
+        table: "likes",
+        column: "user_id"
       },
+      {
+        table: "users",
+        column: "id"
+      }
+    ],
+    [
       {
         table: "likes",
         column: "post_id"
+      },
+      {
+        table: "posts",
+        column: "id"
+      }
+    ],
+    [
+      {
+        table: "transactions",
+        column: "user_id"
+      },
+      {
+        table: "users",
+        column: "id"
       }
     ]
   ];
