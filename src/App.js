@@ -1,9 +1,27 @@
 import React from "react";
+import nearley from "nearley";
+import { useDebouncedCallback } from "use-debounce";
 import "./App.css";
-import Table from "./components/table";
 import Canvas from "./components/canvas";
+import dbGrammar from "./grammar/dbgrammar";
+
+const dbParser = new nearley.Parser(nearley.Grammar.fromCompiled(dbGrammar));
 
 function App() {
+  const [dbString, setdbString] = React.useState();
+  const [dbData, setDbData] = React.useState([]);
+
+  const [debounceFunction] = useDebouncedCallback(e => {
+    //console.log(dbParser.results);
+    try {
+      dbParser.feed(e);
+      setDbData(dbParser.results[0]);
+      console.log(dbParser.results[0]);
+    } catch (ex) {
+      console.log(ex);
+    }
+  }, 1000);
+
   const dataInfo = [
     {
       name: "users",
@@ -178,7 +196,15 @@ function App() {
 
   return (
     <div className="App">
-      <Canvas tables={dataInfo} refs={refs} />
+      <div>
+        <textarea
+          style={{ height: "100%", width: "250px", fontSize: 11 }}
+          onChange={e => {
+            debounceFunction(e.target.value);
+          }}
+        ></textarea>
+      </div>
+      <Canvas data={dbData} />
     </div>
   );
 }
