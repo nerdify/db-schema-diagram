@@ -46,6 +46,9 @@ column_definition -> 	name " " column_type ((null)
 									modifiers: flatten(match[3][0]).filter(item => item !== ' ')
 								}
 							}%}
+						| (_):+ column_definition {% (match) => {
+							return match[1];
+						} %}
 modifier_list ->	modifier {% id %} 
 					| modifier_list "," modifier 
 						{% (match) => {
@@ -95,7 +98,7 @@ ref_definition -> "Ref: " name "." name " > " name "." name	 {% (match) => {
 		}
 	}
 } %}			
-_ -> [\s\t]:+
+_ -> [\s\t]
 NL -> [\n]:+
 name -> [a-zA-Z_]:+ 
 			{% (match, index, reject) => {

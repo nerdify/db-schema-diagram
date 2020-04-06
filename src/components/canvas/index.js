@@ -106,6 +106,7 @@ export default function Canvas({ data }) {
         return item.type === "table";
       })
     );
+    console.log("xxx");
 
     setRefs(
       data.filter((item) => {

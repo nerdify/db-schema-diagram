@@ -59,6 +59,13 @@ var grammar = {
         		modifiers: flatten(match[3][0]).filter(item => item !== ' ')
         	}
         }},
+    {"name": "column_definition$ebnf$1$subexpression$1", "symbols": ["_"]},
+    {"name": "column_definition$ebnf$1", "symbols": ["column_definition$ebnf$1$subexpression$1"]},
+    {"name": "column_definition$ebnf$1$subexpression$2", "symbols": ["_"]},
+    {"name": "column_definition$ebnf$1", "symbols": ["column_definition$ebnf$1", "column_definition$ebnf$1$subexpression$2"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
+    {"name": "column_definition", "symbols": ["column_definition$ebnf$1", "column_definition"], "postprocess":  (match) => {
+        	return match[1];
+        } },
     {"name": "modifier_list", "symbols": ["modifier"], "postprocess": id},
     {"name": "modifier_list", "symbols": ["modifier_list", {"literal":","}, "modifier"], "postprocess":  (match) => {
         	return flatten([match[0],match[2]])
@@ -120,9 +127,7 @@ var grammar = {
         		}
         	}
         } },
-    {"name": "_$ebnf$1", "symbols": [/[\s\t]/]},
-    {"name": "_$ebnf$1", "symbols": ["_$ebnf$1", /[\s\t]/], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
-    {"name": "_", "symbols": ["_$ebnf$1"]},
+    {"name": "_", "symbols": [/[\s\t]/]},
     {"name": "NL$ebnf$1", "symbols": [/[\n]/]},
     {"name": "NL$ebnf$1", "symbols": ["NL$ebnf$1", /[\n]/], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "NL", "symbols": ["NL$ebnf$1"]},
