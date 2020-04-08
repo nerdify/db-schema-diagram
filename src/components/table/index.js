@@ -1,14 +1,18 @@
 import React from "react";
 import styles from "./styles.module.css";
 
-export default function Table({ name, columns }) {
+export default function Table({ name, columns, x, y }) {
   const getType = ({ type, size = null }) => {
     const sizeDefinition = size ? `(${size})` : "";
     return `${type} ${sizeDefinition}`;
   };
 
   return (
-    <div id={`table_${name}`} className={styles.tableContainer}>
+    <div
+      id={`table_${name}`}
+      className={styles.tableContainer}
+      style={{ top: `${x}px`, left: `${y}px` }}
+    >
       <table border="0" cellPadding="0" cellSpacing="0">
         <thead>
           <tr>
@@ -18,7 +22,7 @@ export default function Table({ name, columns }) {
           </tr>
         </thead>
         <tbody>
-          {columns.map(column => {
+          {columns.map((column) => {
             return (
               <tr key={`${name}_${column.name}`}>
                 <td>

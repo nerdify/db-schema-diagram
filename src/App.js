@@ -15,7 +15,7 @@ function App() {
         nearley.Grammar.fromCompiled(dbGrammar)
       );
 
-      dbParser.feed(e);
+      dbParser.feed(e.trim());
       setDbData(dbParser.results[0]);
     } catch (ex) {
       console.log(ex);
