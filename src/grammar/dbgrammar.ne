@@ -24,7 +24,7 @@ enum_definition ->	"Enum " name " {" NL enum_list NL "}"
 								list: match[4],
 							}
 						}%}
-table_definition -> ((" "):* ("Table"|"table"|"TABLE")) (_):+ name (_):* "{" (_):* NL columns NL (_):* "}"
+table_definition -> ((" "):* ("Table"|"table"|"TABLE")) (_):+ name (_):* "{" (_):* NL columns NL (_):* "}" (_):*
 						{%(match) => {
 							return {
 								type: "table",
@@ -81,16 +81,16 @@ enum_var -> [a-zA-Z_]:+
 					if (!enums_allowed.includes(name)) return reject;
 					return name;
 				}%}
-ref_definition -> "Ref: " name "." name " > " name "." name	 {% (match) => {
+ref_definition -> ("Ref:"|"REF:"|"ref:") (_):+ name "." name (_):* ">" (_):* name "." name	 {% (match) => {
 	return {
 		type: "ref",
 		foreign: {
-			table: match[1],
-			column: match[3]
+			table: match[2],
+			column: match[4]
 		},
 		primary: {
-			table: match[5],
-			column: match[7]
+			table: match[8],
+			column: match[10]
 		}
 	}
 } %}			

@@ -55,7 +55,13 @@ var grammar = {
     {"name": "table_definition$ebnf$3", "symbols": []},
     {"name": "table_definition$ebnf$3$subexpression$1", "symbols": ["_"]},
     {"name": "table_definition$ebnf$3", "symbols": ["table_definition$ebnf$3", "table_definition$ebnf$3$subexpression$1"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
-    {"name": "table_definition", "symbols": ["table_definition$subexpression$1", "table_definition$ebnf$1", "name", "table_definition$ebnf$2", {"literal":"{"}, "table_definition$ebnf$3", "NL", "columns", "NL", {"literal":"}"}], "postprocess": (match) => {
+    {"name": "table_definition$ebnf$4", "symbols": []},
+    {"name": "table_definition$ebnf$4$subexpression$1", "symbols": ["_"]},
+    {"name": "table_definition$ebnf$4", "symbols": ["table_definition$ebnf$4", "table_definition$ebnf$4$subexpression$1"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
+    {"name": "table_definition$ebnf$5", "symbols": []},
+    {"name": "table_definition$ebnf$5$subexpression$1", "symbols": ["_"]},
+    {"name": "table_definition$ebnf$5", "symbols": ["table_definition$ebnf$5", "table_definition$ebnf$5$subexpression$1"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
+    {"name": "table_definition", "symbols": ["table_definition$subexpression$1", "table_definition$ebnf$1", "name", "table_definition$ebnf$2", {"literal":"{"}, "table_definition$ebnf$3", "NL", "columns", "NL", "table_definition$ebnf$4", {"literal":"}"}, "table_definition$ebnf$5"], "postprocess": (match) => {
         	return {
         		type: "table",
         		name: match[2],
@@ -146,25 +152,37 @@ var grammar = {
         	if (!enums_allowed.includes(name)) return reject;
         	return name;
         }},
-    {"name": "ref_definition$string$1", "symbols": [{"literal":"R"}, {"literal":"e"}, {"literal":"f"}, {"literal":":"}, {"literal":" "}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "ref_definition$string$2", "symbols": [{"literal":" "}, {"literal":">"}, {"literal":" "}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "ref_definition", "symbols": ["ref_definition$string$1", "name", {"literal":"."}, "name", "ref_definition$string$2", "name", {"literal":"."}, "name"], "postprocess":  (match) => {
+    {"name": "ref_definition$subexpression$1$string$1", "symbols": [{"literal":"R"}, {"literal":"e"}, {"literal":"f"}, {"literal":":"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "ref_definition$subexpression$1", "symbols": ["ref_definition$subexpression$1$string$1"]},
+    {"name": "ref_definition$subexpression$1$string$2", "symbols": [{"literal":"R"}, {"literal":"E"}, {"literal":"F"}, {"literal":":"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "ref_definition$subexpression$1", "symbols": ["ref_definition$subexpression$1$string$2"]},
+    {"name": "ref_definition$subexpression$1$string$3", "symbols": [{"literal":"r"}, {"literal":"e"}, {"literal":"f"}, {"literal":":"}], "postprocess": function joiner(d) {return d.join('');}},
+    {"name": "ref_definition$subexpression$1", "symbols": ["ref_definition$subexpression$1$string$3"]},
+    {"name": "ref_definition$ebnf$1$subexpression$1", "symbols": ["_"]},
+    {"name": "ref_definition$ebnf$1", "symbols": ["ref_definition$ebnf$1$subexpression$1"]},
+    {"name": "ref_definition$ebnf$1$subexpression$2", "symbols": ["_"]},
+    {"name": "ref_definition$ebnf$1", "symbols": ["ref_definition$ebnf$1", "ref_definition$ebnf$1$subexpression$2"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
+    {"name": "ref_definition$ebnf$2", "symbols": []},
+    {"name": "ref_definition$ebnf$2$subexpression$1", "symbols": ["_"]},
+    {"name": "ref_definition$ebnf$2", "symbols": ["ref_definition$ebnf$2", "ref_definition$ebnf$2$subexpression$1"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
+    {"name": "ref_definition$ebnf$3", "symbols": []},
+    {"name": "ref_definition$ebnf$3$subexpression$1", "symbols": ["_"]},
+    {"name": "ref_definition$ebnf$3", "symbols": ["ref_definition$ebnf$3", "ref_definition$ebnf$3$subexpression$1"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
+    {"name": "ref_definition", "symbols": ["ref_definition$subexpression$1", "ref_definition$ebnf$1", "name", {"literal":"."}, "name", "ref_definition$ebnf$2", {"literal":">"}, "ref_definition$ebnf$3", "name", {"literal":"."}, "name"], "postprocess":  (match) => {
         	return {
         		type: "ref",
         		foreign: {
-        			table: match[1],
-        			column: match[3]
+        			table: match[2],
+        			column: match[4]
         		},
         		primary: {
-        			table: match[5],
-        			column: match[7]
+        			table: match[8],
+        			column: match[10]
         		}
         	}
         } },
-    {"name": "_", "symbols": [/[\s\t]/]},
-    {"name": "NL$ebnf$1", "symbols": [/[\n]/]},
-    {"name": "NL$ebnf$1", "symbols": ["NL$ebnf$1", /[\n]/], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
-    {"name": "NL", "symbols": ["NL$ebnf$1"]},
+    {"name": "_", "symbols": [/[\s|\t]/]},
+    {"name": "NL", "symbols": [/[\n]/]},
     {"name": "name$ebnf$1", "symbols": [/[a-zA-Z_]/]},
     {"name": "name$ebnf$1", "symbols": ["name$ebnf$1", /[a-zA-Z_]/], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
     {"name": "name", "symbols": ["name$ebnf$1"], "postprocess":  (match, index, reject) => {

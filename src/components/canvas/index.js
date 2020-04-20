@@ -222,18 +222,19 @@ export default function Canvas() {
         draw
       );
 
-      draw.current
+      path.push(["M", from.x, from.y]);
+      path.push(["L", colForeign.center.x, colForeign.center.y]);
+      path.push(["M", to.x, to.y]);
+      path.push(["L", colPrimary.center.x, colPrimary.center.y]);
+
+      const element = draw.current
         .path(ArrToSvgPath(path))
         .stroke({ color: "#f06", width: 1 })
         .fill("none");
 
-      draw.current
-        .line(from.x, from.y, colForeign.center.x, colForeign.center.y)
-        .stroke({ color: "#f06", width: 1 });
-
-      draw.current
-        .line(to.x, to.y, colPrimary.center.x, colPrimary.center.y)
-        .stroke({ color: "#f06", width: 1 });
+      element.on(["mouseover"], (e) => {
+        console.log(e);
+      });
     });
 
     //console.log(refs);
