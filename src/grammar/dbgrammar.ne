@@ -94,8 +94,8 @@ ref_definition -> "Ref: " name "." name " > " name "." name	 {% (match) => {
 		}
 	}
 } %}			
-_ -> [\s\t]
-NL -> [\n]:+
+_ -> [\s|\t]
+NL -> [\n]
 name -> [a-zA-Z_]:+ 
 			{% (match, index, reject) => {
 				const name = match[0].join('');
