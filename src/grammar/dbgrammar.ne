@@ -24,12 +24,12 @@ enum_definition ->	"Enum " name " {" NL enum_list NL "}"
 								list: match[4],
 							}
 						}%}
-table_definition -> "Table " name " {" NL columns NL "}" 
+table_definition -> ((" "):* ("Table"|"table"|"TABLE")) (_):+ name (_):* "{" (_):* NL columns NL (_):* "}"
 						{%(match) => {
 							return {
 								type: "table",
-								name: match[1],
-								columns: match[4]
+								name: match[2],
+								columns: match[7]
 							}
 						}%}
 columns ->	column_definition 
@@ -37,27 +37,26 @@ columns ->	column_definition
 				{% (match) => {
 					return flatten([match[0],match[2]])
 				}%}
-column_definition -> 	name " " column_type ((null)
-						| (" " modifier_list))
+column_definition -> (_):* name " " column_type (_):* ((null)| (modifier_list))
 							{% (match) => {
 								return {
-									name: match[0],
-									type: match[2],
-									modifiers: flatten(match[3][0]).filter(item => item !== ' ')
+									name: match[1],
+									type: match[3],
+									modifiers: flatten(match[5][0]).filter(item => item !== ' ')
 								}
 							}%}
-						| (_):+ column_definition {% (match) => {
-							return match[1];
-						} %}
 modifier_list ->	modifier {% id %} 
-					| modifier_list "," modifier 
+					| modifier_list (_):* (null|",") (_):* modifier 
 						{% (match) => {
-							return flatten([match[0],match[2]])
+							return flatten([match[0],match[4]])
 						}%}
-					| "[" modifier_list "]" 
+					| "[" (_):* modifier_list (" "):* "]" (_):*
 						{% (match) => {
-							return match[1];
+							return match[2];
 						}%}
+modifier -> "not null" {%id%} 
+			| "unique" {%id%}
+			| "primary key" {%id%}
 column_type -> 	"varchar" {%id%} 
 				| "integer" {%id%} 
 				| "float" {%id%} 
@@ -69,9 +68,6 @@ column_type -> 	"varchar" {%id%}
 						(match) => `${match[0]}(${match[2][0].join('')})` 
 					%} 
 				| enum_var {% id %}
-modifier -> "not null" {%id%} 
-			| "unique" {%id%} 
-			| "primary key" {%id%}
 enum_list -> name {%id%} 
 			| name NL enum_list 
 				{% (match) => {
