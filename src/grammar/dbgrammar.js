@@ -3,8 +3,6 @@
 (function () {
 function id(x) { return x[0]; }
 
-  const enums_list = ["user_status"]
-
   const flatten = d => {
     return d.reduce(
       (a, b) => {
@@ -23,8 +21,9 @@ var grammar = {
     {"name": "document_definition$subexpression$2", "symbols": ["table_definition"]},
     {"name": "document_definition$subexpression$2", "symbols": ["enum_definition"]},
     {"name": "document_definition$subexpression$2", "symbols": ["ref_definition"]},
-    {"name": "document_definition", "symbols": ["document_definition$subexpression$2", "NL", "document_definition"], "postprocess": (match) => {
-        	return flatten([match[0],match[2]])
+    {"name": "document_definition$subexpression$3", "symbols": ["document_definition"]},
+    {"name": "document_definition", "symbols": ["document_definition$subexpression$2", "NL", "document_definition$subexpression$3"], "postprocess": (match) => {
+        	return flatten([match[0],flatten(match[2])])
         }},
     {"name": "enum_definition$string$1", "symbols": [{"literal":"E"}, {"literal":"n"}, {"literal":"u"}, {"literal":"m"}, {"literal":" "}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "enum_definition$string$2", "symbols": [{"literal":" "}, {"literal":"{"}], "postprocess": function joiner(d) {return d.join('');}},
@@ -119,26 +118,9 @@ var grammar = {
     {"name": "modifier", "symbols": ["modifier$string$2"], "postprocess": id},
     {"name": "modifier$string$3", "symbols": [{"literal":"p"}, {"literal":"r"}, {"literal":"i"}, {"literal":"m"}, {"literal":"a"}, {"literal":"r"}, {"literal":"y"}, {"literal":" "}, {"literal":"k"}, {"literal":"e"}, {"literal":"y"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "modifier", "symbols": ["modifier$string$3"], "postprocess": id},
-    {"name": "column_type$string$1", "symbols": [{"literal":"v"}, {"literal":"a"}, {"literal":"r"}, {"literal":"c"}, {"literal":"h"}, {"literal":"a"}, {"literal":"r"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "column_type", "symbols": ["column_type$string$1"], "postprocess": id},
-    {"name": "column_type$string$2", "symbols": [{"literal":"i"}, {"literal":"n"}, {"literal":"t"}, {"literal":"e"}, {"literal":"g"}, {"literal":"e"}, {"literal":"r"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "column_type", "symbols": ["column_type$string$2"], "postprocess": id},
-    {"name": "column_type$string$3", "symbols": [{"literal":"f"}, {"literal":"l"}, {"literal":"o"}, {"literal":"a"}, {"literal":"t"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "column_type", "symbols": ["column_type$string$3"], "postprocess": id},
-    {"name": "column_type$string$4", "symbols": [{"literal":"t"}, {"literal":"e"}, {"literal":"x"}, {"literal":"t"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "column_type", "symbols": ["column_type$string$4"], "postprocess": id},
-    {"name": "column_type$string$5", "symbols": [{"literal":"d"}, {"literal":"a"}, {"literal":"t"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "column_type", "symbols": ["column_type$string$5"], "postprocess": id},
-    {"name": "column_type$string$6", "symbols": [{"literal":"d"}, {"literal":"a"}, {"literal":"t"}, {"literal":"e"}, {"literal":"t"}, {"literal":"i"}, {"literal":"m"}, {"literal":"e"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "column_type", "symbols": ["column_type$string$6"], "postprocess": id},
-    {"name": "column_type$subexpression$1$string$1", "symbols": [{"literal":"v"}, {"literal":"a"}, {"literal":"r"}, {"literal":"c"}, {"literal":"h"}, {"literal":"a"}, {"literal":"r"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "column_type$subexpression$1", "symbols": ["column_type$subexpression$1$string$1"]},
-    {"name": "column_type$subexpression$1$string$2", "symbols": [{"literal":"i"}, {"literal":"n"}, {"literal":"t"}, {"literal":"e"}, {"literal":"g"}, {"literal":"e"}, {"literal":"r"}], "postprocess": function joiner(d) {return d.join('');}},
-    {"name": "column_type$subexpression$1", "symbols": ["column_type$subexpression$1$string$2"]},
-    {"name": "column_type", "symbols": ["column_type$subexpression$1", {"literal":"("}, "number", {"literal":")"}], "postprocess":  
-        (match) => `${match[0]}(${match[2][0].join('')})` 
-        					},
-    {"name": "column_type", "symbols": ["enum_var"], "postprocess": id},
+    {"name": "column_type$ebnf$1", "symbols": []},
+    {"name": "column_type$ebnf$1", "symbols": ["column_type$ebnf$1", /[A-Za-z_()0-9]/], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
+    {"name": "column_type", "symbols": ["column_type$ebnf$1"], "postprocess": (match) => {return match[0].join('')}},
     {"name": "enum_list", "symbols": ["name"], "postprocess": id},
     {"name": "enum_list", "symbols": ["name", "NL", "enum_list"], "postprocess":  (match) => {
         	return flatten([match[0], match[2]]);
@@ -168,7 +150,10 @@ var grammar = {
     {"name": "ref_definition$ebnf$3", "symbols": []},
     {"name": "ref_definition$ebnf$3$subexpression$1", "symbols": ["_"]},
     {"name": "ref_definition$ebnf$3", "symbols": ["ref_definition$ebnf$3", "ref_definition$ebnf$3$subexpression$1"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
-    {"name": "ref_definition", "symbols": ["ref_definition$subexpression$1", "ref_definition$ebnf$1", "name", {"literal":"."}, "name", "ref_definition$ebnf$2", {"literal":">"}, "ref_definition$ebnf$3", "name", {"literal":"."}, "name"], "postprocess":  (match) => {
+    {"name": "ref_definition$ebnf$4", "symbols": []},
+    {"name": "ref_definition$ebnf$4$subexpression$1", "symbols": ["_"]},
+    {"name": "ref_definition$ebnf$4", "symbols": ["ref_definition$ebnf$4", "ref_definition$ebnf$4$subexpression$1"], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
+    {"name": "ref_definition", "symbols": ["ref_definition$subexpression$1", "ref_definition$ebnf$1", "name", {"literal":"."}, "name", "ref_definition$ebnf$2", {"literal":">"}, "ref_definition$ebnf$3", "name", {"literal":"."}, "name", "ref_definition$ebnf$4"], "postprocess":  (match) => {
         	return {
         		type: "ref",
         		foreign: {
@@ -181,7 +166,7 @@ var grammar = {
         		}
         	}
         } },
-    {"name": "_", "symbols": [/[\s|\t]/]},
+    {"name": "_", "symbols": [/[\s]/]},
     {"name": "NL", "symbols": [/[\n]/]},
     {"name": "name$ebnf$1", "symbols": [/[a-zA-Z_]/]},
     {"name": "name$ebnf$1", "symbols": ["name$ebnf$1", /[a-zA-Z_]/], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},

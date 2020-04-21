@@ -153,7 +153,7 @@ export default function Canvas() {
   const draw = React.useRef(null);
 
   useEffect(() => {
-    draw.current = SVG().addTo("#svg-layer").size("100%", "100%");
+    draw.current = SVG().addTo("#draggables").size("100%", "100%");
   }, []);
 
   useEffect(() => {
@@ -242,13 +242,8 @@ export default function Canvas() {
 
   return (
     <div id="canvas" className={styles.canvas}>
-      <div
-        className={styles.layer}
-        style={{
-          zIndex: 100,
-        }}
-        id="draggables"
-      >
+      <div id="svg-layer" className={styles.layer} style={{}}></div>
+      <div className={styles.layer} style={{}} id="draggables">
         {tables.length > 0 &&
           tables.map((table) => {
             return (
@@ -279,13 +274,6 @@ export default function Canvas() {
             );
           })}
       </div>
-      <div
-        id="svg-layer"
-        className={styles.layer}
-        style={{
-          zIndex: 0,
-        }}
-      ></div>
     </div>
   );
 }

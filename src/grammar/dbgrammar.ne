@@ -1,6 +1,4 @@
 @{%
-  const enums_list = ["user_status"]
-
   const flatten = d => {
     return d.reduce(
       (a, b) => {
@@ -12,9 +10,9 @@
 %}
 
 document_definition ->	(table_definition|enum_definition|ref_definition) {%id%}
-						| (table_definition|enum_definition|ref_definition) NL document_definition 
+						| (table_definition|enum_definition|ref_definition) NL (document_definition) 
 							{%(match) => {
-								return flatten([match[0],match[2]])
+								return flatten([match[0],flatten(match[2])])
 							}%}
 enum_definition ->	"Enum " name " {" NL enum_list NL "}" 
 						{% (match) => {
@@ -57,17 +55,7 @@ modifier_list ->	modifier {% id %}
 modifier -> "not null" {%id%} 
 			| "unique" {%id%}
 			| "primary key" {%id%}
-column_type -> 	"varchar" {%id%} 
-				| "integer" {%id%} 
-				| "float" {%id%} 
-				| "text" {%id%}
-				| "date" {%id%}
-				| "datetime" {%id%}
-				| ("varchar" | "integer") "(" number ")" 
-					{% 
-						(match) => `${match[0]}(${match[2][0].join('')})` 
-					%} 
-				| enum_var {% id %}
+column_type -> 	[A-Za-z_()0-9]:* {%(match) => {return match[0].join('')}%}
 enum_list -> name {%id%} 
 			| name NL enum_list 
 				{% (match) => {
@@ -81,7 +69,7 @@ enum_var -> [a-zA-Z_]:+
 					if (!enums_allowed.includes(name)) return reject;
 					return name;
 				}%}
-ref_definition -> ("Ref:"|"REF:"|"ref:") (_):+ name "." name (_):* ">" (_):* name "." name	 {% (match) => {
+ref_definition -> ("Ref:"|"REF:"|"ref:") (_):+ name "." name (_):* ">" (_):* name "." name (_):*	 {% (match) => {
 	return {
 		type: "ref",
 		foreign: {
@@ -94,7 +82,7 @@ ref_definition -> ("Ref:"|"REF:"|"ref:") (_):+ name "." name (_):* ">" (_):* nam
 		}
 	}
 } %}			
-_ -> [\s|\t]
+_ -> [\s]
 NL -> [\n]
 name -> [a-zA-Z_]:+ 
 			{% (match, index, reject) => {
