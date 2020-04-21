@@ -62,12 +62,8 @@ enum_list -> name {%id%}
 					return flatten([match[0], match[2]]);
 				}%}
 enum_var -> [a-zA-Z_]:+ 
-				{% (match, index, reject) => {
-					const name = match[0].join('');
-					const enums_allowed = enums_list;
-
-					if (!enums_allowed.includes(name)) return reject;
-					return name;
+				{% (match) => {
+					return match[0].join('');
 				}%}
 ref_definition -> ("Ref:"|"REF:"|"ref:") (_):+ name "." name (_):* ">" (_):* name "." name (_):*	 {% (match) => {
 	return {

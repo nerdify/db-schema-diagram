@@ -127,12 +127,8 @@ var grammar = {
         }},
     {"name": "enum_var$ebnf$1", "symbols": [/[a-zA-Z_]/]},
     {"name": "enum_var$ebnf$1", "symbols": ["enum_var$ebnf$1", /[a-zA-Z_]/], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
-    {"name": "enum_var", "symbols": ["enum_var$ebnf$1"], "postprocess":  (match, index, reject) => {
-        	const name = match[0].join('');
-        	const enums_allowed = enums_list;
-        
-        	if (!enums_allowed.includes(name)) return reject;
-        	return name;
+    {"name": "enum_var", "symbols": ["enum_var$ebnf$1"], "postprocess":  (match) => {
+        	return match[0].join('');
         }},
     {"name": "ref_definition$subexpression$1$string$1", "symbols": [{"literal":"R"}, {"literal":"e"}, {"literal":"f"}, {"literal":":"}], "postprocess": function joiner(d) {return d.join('');}},
     {"name": "ref_definition$subexpression$1", "symbols": ["ref_definition$subexpression$1$string$1"]},
