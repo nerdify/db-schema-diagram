@@ -1,11 +1,17 @@
 import React from "react";
 import nearley from "nearley";
 import dagre from "dagre";
+import AceEditor from "react-ace";
 import { useDebouncedCallback } from "use-debounce";
 import "./App.css";
 import Canvas from "./components/canvas";
 import dbGrammar from "./grammar/dbgrammar";
 import TableDataContext from "./context";
+
+import "./assets/tailwind.generated.css";
+
+import "ace-builds/src-noconflict/mode-java";
+import "ace-builds/src-noconflict/theme-github";
 
 const arrangeItems = (tables, refs) => {
   const g = new dagre.graphlib.Graph();
@@ -93,6 +99,8 @@ function App() {
     tableDataEncoded
   );
 
+  const editorValue = React.useRef("");
+
   const [debounceFunction] = useDebouncedCallback((e) => {
     try {
       const dbParser = new nearley.Parser(
@@ -112,17 +120,28 @@ function App() {
 
   return (
     <div className="App">
-      <div>
-        <textarea
-          style={{ height: "100%", width: "250px", fontSize: 11 }}
-          onChange={(e) => {
-            debounceFunction(e.target.value);
-          }}
-        ></textarea>
+      <div className="flex bg-gray-300 pt-1 w-full">
+        <div className="pr-1" style={{ height: "100%", width: "250px" }}>
+          <AceEditor
+            value={editorValue.current}
+            mode="java"
+            theme="github"
+            width="100%"
+            height="100%"
+            onChange={(e) => {
+              editorValue.current = e;
+              debounceFunction(e);
+            }}
+            name="UNIQUE_ID_OF_DIV"
+            editorProps={{ $blockScrolling: true }}
+          />
+        </div>
+        <div className="flex-1 bg-white overflow-scroll shadow-inner">
+          <TableDataContext.Provider value={{ state, dispatch }}>
+            <Canvas />
+          </TableDataContext.Provider>
+        </div>
       </div>
-      <TableDataContext.Provider value={{ state, dispatch }}>
-        <Canvas />
-      </TableDataContext.Provider>
     </div>
   );
 }
