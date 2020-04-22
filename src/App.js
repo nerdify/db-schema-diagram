@@ -10,8 +10,9 @@ import TableDataContext from "./context";
 
 import "./assets/tailwind.generated.css";
 
-import "ace-builds/src-noconflict/mode-java";
-import "ace-builds/src-noconflict/theme-github";
+import "ace-builds/src-noconflict/theme-monokai";
+
+import aceGrammar from "./grammar/aceGrammar";
 
 const arrangeItems = (tables, refs) => {
   const g = new dagre.graphlib.Graph();
@@ -94,6 +95,8 @@ const tableDataReducer = (state, action) => {
 };
 
 function App() {
+  const aceComponent = React.useRef(null);
+
   const [state, dispatch] = React.useReducer(
     tableDataReducer,
     tableDataEncoded
@@ -118,14 +121,22 @@ function App() {
     }
   }, 1000);
 
+  React.useEffect(() => {
+    const customGrammar = new aceGrammar();
+    aceComponent.current.editor.getSession().setMode(customGrammar);
+    if (aceComponent.current !== null) {
+    }
+  }, [aceComponent]);
+
   return (
     <div className="App">
       <div className="flex bg-gray-300 pt-1 w-full">
         <div className="pr-1" style={{ height: "100%", width: "250px" }}>
           <AceEditor
+            ref={aceComponent}
             value={editorValue.current}
-            mode="java"
-            theme="github"
+            mode="text"
+            theme="monokai"
             width="100%"
             height="100%"
             onChange={(e) => {
