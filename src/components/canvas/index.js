@@ -10,7 +10,7 @@ import Table from "../table/";
 
 import styles from "./styles.module.css";
 
-const isPointInsideTable = ([x, y], tableId, containerId) => {
+const isPointInsideTable = ([x, y], tableId, containerId, draw) => {
   const parentRect = document
     .getElementById(containerId)
     .getBoundingClientRect();
@@ -18,16 +18,18 @@ const isPointInsideTable = ([x, y], tableId, containerId) => {
   const tableRect = document.getElementById(tableId).getBoundingClientRect();
 
   const tableRelX = tableRect.x - parentRect.x - 10;
-  const tableRelY = tableRect.y - parentRect.y - 10;
+  const tableRelY = tableRect.y - parentRect.y;
 
   const width = tableRect.width + 20;
-  const height = tableRect.height + 20;
+  const height = tableRect.height;
 
   const isIn =
     x >= tableRelX &&
     x <= tableRelX + width &&
     y >= tableRelY &&
     y <= tableRelY + height;
+
+  //draw.current.rect(width, height).fill("#afa").move(tableRelX, tableRelY);
 
   return isIn;
 };
@@ -36,73 +38,48 @@ const getPath = (from, to, canvasId, tableAId, tableBId, draw = null) => {
   const middleX = Math.ceil((from.x + to.x) / 2);
   const middleY = Math.ceil((from.y + to.y) / 2);
 
-  const points = {
-    from: {
-      ...from,
-      connections: {
-        topCenter: 10,
-        leftMiddle: 10,
-      },
-    },
-    topCenter: {
-      x: middleX,
-      y: from.y,
-      connections: {
-        topRight: 10,
-        centerMiddle: 5,
-        middleBottom: 3,
-      },
-    },
-    topRight: {
-      x: to.x,
-      y: from.y,
-      connections: {
-        rightMiddle: 10,
-      },
-    },
-    leftMiddle: {
-      x: from.x,
-      y: middleY,
-      connections: {
-        leftBottom: 10,
-        centerMiddle: 5,
-      },
-    },
-    centerMiddle: {
-      x: middleX,
-      y: middleY,
-      connections: {
-        rightMiddle: 10,
-        middleBottom: 10,
-      },
-    },
-    rightMiddle: {
-      x: to.x,
-      y: middleY,
-      connections: {
-        to: 1,
-      },
-    },
-    leftBottom: {
-      x: from.x,
-      y: to.y,
-      connections: {
-        middleBottom: 1,
-      },
-    },
-    middleBottom: {
-      x: middleX,
-      y: to.y,
-      connections: {
-        to: 1,
-      },
-    },
-    to: to,
+  const genGrid = (from, to, columns, rows) => {
+    const points = {};
+    const deltaX = (to.x - from.x) / columns;
+    const deltaY = (to.y - from.y) / rows;
+
+    for (let i = 0; i <= rows; i++) {
+      for (let j = 0; j <= columns; j++) {
+        const node = {
+          x: from.x + deltaX * j,
+          y: from.y + deltaY * i,
+          connections: {},
+        };
+
+        if (j < columns) {
+          node.connections[`p${i}${j + 1}`] = 10;
+        }
+
+        if (i < rows) {
+          node.connections[`p${i + 1}${j}`] = 10;
+        }
+
+        points[`p${i}${j}`] = node;
+      }
+    }
+
+    return points;
   };
+
+  const cols = 4;
+  const rows = 4;
+  const points = genGrid(from, to, cols, rows);
+
+  points[`p${0}${0}`].connections[
+    `p${0}${2}`
+  ] = 1; /*TODO. look for non hardcoded way */
+  points[`p${0}${2}`].connections[`p${4}${2}`] = 1;
+  points[`p${4}${2}`].connections[`p${4}${4}`] = 1;
 
   const route = new Graph();
 
   Object.entries(points).forEach(([key, p]) => {
+    //draw.current.circle(4).move(p.x, p.y).fill("#a00");
     if (key !== "to") {
       route.addNode(key, p.connections);
     }
@@ -111,15 +88,15 @@ const getPath = (from, to, canvasId, tableAId, tableBId, draw = null) => {
   Object.entries(points).forEach(([key, p]) => {
     if (key !== "to") {
       if (
-        isPointInsideTable([p.x, p.y], tableAId, canvasId, key) ||
-        isPointInsideTable([p.x, p.y], tableBId, canvasId, key)
+        isPointInsideTable([p.x, p.y], tableAId, canvasId, draw) ||
+        isPointInsideTable([p.x, p.y], tableBId, canvasId, draw)
       ) {
         route.removeNode(key);
       }
     }
   });
 
-  const sPath = route.path("from", "to");
+  const sPath = route.path(`p${0}${0}`, `p${cols}${rows}`);
 
   if (!sPath) {
     return [
@@ -172,6 +149,17 @@ export default function Canvas() {
         const x = Math.ceil(elX - parentX + 87);
         const y = Math.ceil(elY - parentY + 10);
 
+        /*
+        draw.current
+          .circle(4)
+          .move(x - 100, y)
+          .fill("#faa");
+        draw.current
+          .circle(4)
+          .move(x + 100, y)
+          .fill("#aaf");
+          */
+
         return {
           name: column.name,
           table: table.name,
@@ -222,10 +210,11 @@ export default function Canvas() {
         draw
       );
 
+      /*
       path.push(["M", from.x, from.y]);
       path.push(["L", colForeign.center.x, colForeign.center.y]);
       path.push(["M", to.x, to.y]);
-      path.push(["L", colPrimary.center.x, colPrimary.center.y]);
+      path.push(["L", colPrimary.center.x, colPrimary.center.y]);*/
 
       const element = draw.current
         .path(ArrToSvgPath(path))
