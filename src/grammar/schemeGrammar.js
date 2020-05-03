@@ -2,6 +2,7 @@ import { createToken, Lexer, CstParser } from "chevrotain";
 
 // ----------------- Lexer -----------------
 const tableDf = createToken({ name: "TableDefinition", pattern: /TABLE/i });
+const RefDf = createToken({ name: "RefDefinition", pattern: /REF[\s]*:/i });
 
 const lBraket = createToken({ name: "lBraket", pattern: /{/ });
 const rBraket = createToken({ name: "RBraket", pattern: /}/ });
@@ -11,15 +12,14 @@ const rKey = createToken({ name: "rKey", pattern: /\]/ });
 const comma = createToken({ name: "comma", pattern: /,/ });
 
 const notNull = createToken({ name: "notNull", pattern: /not null/ });
-const primaryKey = createToken({
-  name: "primaryKey",
-  pattern: /primary key/,
-});
+const primaryKey = createToken({ name: "primaryKey", pattern: /primary key/ });
 const unique = createToken({ name: "unique", pattern: /unique/ });
 
 const name = createToken({ name: "name", pattern: /[\w]{2,}(\(\d+\))?/ });
 
 const NL = createToken({ name: "NL", pattern: /[\n]+/ });
+const GT = createToken({ name: "GT", pattern: /\>/ });
+const DOT = createToken({ name: "DOT", pattern: /\./ });
 const WS = createToken({
   name: "WS",
   pattern: /[\s|\t]+/,
@@ -28,6 +28,7 @@ const WS = createToken({
 
 const allTokens = [
   tableDf,
+  RefDf,
   lBraket,
   rBraket,
   lKey,
@@ -39,6 +40,8 @@ const allTokens = [
   name,
   NL,
   WS,
+  DOT,
+  GT,
 ];
 
 const DBDefinitionLexer = new Lexer(allTokens, {
@@ -52,10 +55,51 @@ export class SchemeDBParser extends CstParser {
     super(allTokens);
     const $ = this;
 
-    $.RULE("tables", () => {
+    $.RULE("elements", () => {
       $.MANY(() => {
-        $.SUBRULE($.table, { LABEL: "list" });
+        $.OR([
+          {
+            ALT: () => {
+              $.SUBRULE($.table, { LABEL: "list" });
+            },
+          },
+          {
+            ALT: () => {
+              $.SUBRULE($.ref, { LABEL: "list" });
+            },
+          },
+        ]);
       });
+    });
+
+    $.RULE("ref", () => {
+      $.CONSUME(RefDf);
+      $.SUBRULE($.foreign_ref);
+      $.CONSUME(GT);
+      $.SUBRULE($.primary_ref);
+      $.CONSUME(NL);
+    });
+
+    $.RULE("foreign_ref", () => {
+      $.SUBRULE($.ref_table_col);
+    });
+
+    $.RULE("primary_ref", () => {
+      $.SUBRULE($.ref_table_col);
+    });
+
+    $.RULE("ref_table_col", () => {
+      $.SUBRULE($.ref_table);
+      $.CONSUME(DOT);
+      $.SUBRULE($.ref_column);
+    });
+
+    $.RULE("ref_table", () => {
+      $.CONSUME(name);
+    });
+
+    $.RULE("ref_column", () => {
+      $.CONSUME(name);
     });
 
     $.RULE("table", () => {

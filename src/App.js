@@ -1,11 +1,9 @@
 import React from "react";
-import nearley from "nearley";
 import ELK from "elkjs/lib/elk.bundled.js";
 import AceEditor from "react-ace";
 import { useDebouncedCallback } from "use-debounce";
 import "./App.css";
 import Canvas from "./components/canvas";
-import dbGrammar from "./grammar/dbgrammar";
 import { SchemeDBParser, DBDefinitionLexer } from "./grammar/schemeGrammar";
 import TableDataContext from "./context";
 
@@ -21,7 +19,7 @@ const parseInput = (text) => {
   const lexingResult = DBDefinitionLexer.tokenize(text);
   schemeParser.input = lexingResult.tokens;
 
-  const result = schemeParser.tables();
+  const result = schemeParser.elements();
 
   const baseSchemeVisitor = schemeParser.getBaseCstVisitorConstructorWithDefaults();
   class customVisitor extends baseSchemeVisitor {
@@ -30,12 +28,31 @@ const parseInput = (text) => {
       this.validateVisitor();
     }
 
-    tables(ctx) {
-      const result = ctx.list.map((table) => {
-        return this.visit(table);
+    elements(ctx) {
+      const result = ctx.list.map((element) => {
+        return this.visit(element);
       });
 
       return result;
+    }
+
+    ref(ctx) {
+      return {
+        type: "ref",
+        foreign: {
+          ...this.ref_table_col(ctx.foreign_ref[0].children.ref_table_col[0]),
+        },
+        primary: {
+          ...this.ref_table_col(ctx.primary_ref[0].children.ref_table_col[0]),
+        },
+      };
+    }
+
+    ref_table_col(ctx) {
+      return {
+        table: ctx.children.ref_table[0].children.name[0].image,
+        column: ctx.children.ref_column[0].children.name[0].image,
+      };
     }
 
     table(ctx) {
@@ -218,13 +235,8 @@ function App() {
 
   const [debounceFunction] = useDebouncedCallback((e) => {
     try {
-      const dbParser = new nearley.Parser(
-        nearley.Grammar.fromCompiled(dbGrammar)
-      );
-
-      dbParser.feed(e.trim());
-
-      console.log(dbParser.results);
+      //dbParser.feed(e.trim());
+      //console.log(dbParser.results);
       console.log("===");
       console.log(parseInput(e.trim() + "\n"));
 
@@ -234,7 +246,7 @@ function App() {
         throw "empty";
       }*/
 
-      console.log("parsed shceme", parsedShcheme);
+      console.log(parsedShcheme);
       getTableLayout(parsedShcheme);
     } catch (ex) {
       console.log(ex);
