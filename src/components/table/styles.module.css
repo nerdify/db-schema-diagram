@@ -1,5 +1,6 @@
 .tableContainer {
   width: 175px;
+  overflow: hidden;
 }
 
 .tableContainer table {

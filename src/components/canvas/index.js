@@ -35,9 +35,6 @@ const isPointInsideTable = ([x, y], tableId, containerId, draw) => {
 };
 
 const getPath = (from, to, canvasId, tableAId, tableBId, draw = null) => {
-  const middleX = Math.ceil((from.x + to.x) / 2);
-  const middleY = Math.ceil((from.y + to.y) / 2);
-
   const genGrid = (from, to, columns, rows) => {
     const points = {};
     const deltaX = (to.x - from.x) / columns;
@@ -75,6 +72,13 @@ const getPath = (from, to, canvasId, tableAId, tableBId, draw = null) => {
   ] = 1; /*TODO. look for non hardcoded way */
   points[`p${0}${2}`].connections[`p${4}${2}`] = 1;
   points[`p${4}${2}`].connections[`p${4}${4}`] = 1;
+  points[`p${0}${2}`].connections[`p${4}${2}`] = 1;
+
+  points[`p${0}${0}`].connections[`p${0}${4}`] = 5;
+  points[`p${0}${4}`].connections[`p${4}${4}`] = 5;
+
+  points[`p${0}${0}`].connections[`p${4}${0}`] = 5;
+  points[`p${4}${0}`].connections[`p${4}${4}`] = 5;
 
   const route = new Graph();
 
@@ -126,6 +130,8 @@ export default function Canvas() {
   const tablesDataContext = useContext(TableDataContext);
   const tables = tablesDataContext.state.tables;
   const refs = tablesDataContext.state.refs;
+  const width = tablesDataContext.state.width;
+  const height = tablesDataContext.state.height;
   const [columnPoints, setColumnPoints] = React.useState([]);
   const draw = React.useRef(null);
 
@@ -210,11 +216,10 @@ export default function Canvas() {
         draw
       );
 
-      /*
       path.push(["M", from.x, from.y]);
       path.push(["L", colForeign.center.x, colForeign.center.y]);
       path.push(["M", to.x, to.y]);
-      path.push(["L", colPrimary.center.x, colPrimary.center.y]);*/
+      path.push(["L", colPrimary.center.x, colPrimary.center.y]);
 
       const element = draw.current
         .path(ArrToSvgPath(path))
@@ -230,8 +235,11 @@ export default function Canvas() {
   }, [columnPoints]);
 
   return (
-    <div id="canvas" className={styles.canvas}>
-      <div id="svg-layer" className={styles.layer} style={{}}></div>
+    <div
+      id="canvas"
+      style={{ minHeight: height, minWidth: width, border: "1px solid red" }}
+      className={styles.canvas}
+    >
       <div className={styles.layer} style={{}} id="draggables">
         {tables.length > 0 &&
           tables.map((table) => {

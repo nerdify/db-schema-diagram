@@ -78,7 +78,7 @@ ref_definition -> ("Ref:"|"REF:"|"ref:") (_):+ name "." name (_):* ">" (_):* nam
 		}
 	}
 } %}			
-_ -> [\s]
+_ -> [ ]
 NL -> [\n]
 name -> [a-zA-Z_]:+ 
 			{% (match, index, reject) => {

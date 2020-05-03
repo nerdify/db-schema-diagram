@@ -1,4 +1,4 @@
-// Generated automatically by nearley, version 2.19.1
+// Generated automatically by nearley, version 2.19.3
 // http://github.com/Hardmath123/nearley
 (function () {
 function id(x) { return x[0]; }
@@ -162,7 +162,7 @@ var grammar = {
         		}
         	}
         } },
-    {"name": "_", "symbols": [/[\s]/]},
+    {"name": "_", "symbols": [/[ ]/]},
     {"name": "NL", "symbols": [/[\n]/]},
     {"name": "name$ebnf$1", "symbols": [/[a-zA-Z_]/]},
     {"name": "name$ebnf$1", "symbols": ["name$ebnf$1", /[a-zA-Z_]/], "postprocess": function arrpush(d) {return d[0].concat([d[1]]);}},
