@@ -53,5 +53,5 @@
 }
 
 .column:global(.hover) {
-  background-color: #dcdcdc !important;
+  background-color: #e0e0e0 !important;
 }

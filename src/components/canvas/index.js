@@ -226,15 +226,17 @@ export default function Canvas() {
 
       const element = draw.current
         .path(ArrToSvgPath(path))
-        .stroke({ color: "#f06", width: 2 })
+        .stroke({ color: "#cbcbcb", width: 2 })
         .fill("none");
 
       element.on(["mouseover"], (e) => {
+        element.stroke({ color: "#7e7e7e", width: 2 });
         document.getElementById(colForeignId).classList.add("hover");
         document.getElementById(colPrimaryId).classList.add("hover");
       });
 
       element.on(["mouseout"], (e) => {
+        element.stroke({ color: "#cbcbcb", width: 2 });
         document.getElementById(colForeignId).classList.remove("hover");
         document.getElementById(colPrimaryId).classList.remove("hover");
       });
