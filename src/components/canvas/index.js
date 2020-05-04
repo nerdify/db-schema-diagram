@@ -226,7 +226,7 @@ export default function Canvas() {
 
       const element = draw.current
         .path(ArrToSvgPath(path))
-        .stroke({ color: "#f06", width: 1 })
+        .stroke({ color: "#f06", width: 2 })
         .fill("none");
 
       element.on(["mouseover"], (e) => {

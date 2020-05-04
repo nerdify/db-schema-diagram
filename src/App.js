@@ -47,7 +47,14 @@ const arrangeItems = async (tables, refs) => {
 
   const graph = {
     id: "root",
-    layoutOptions: { "elk.algorithm": "layered" },
+    layoutOptions: {
+      "elk.algorithm": "layered",
+      "elk.direction": "RIGHT",
+      "elk.padding": "[top=25,left=25,bottom=25,right=25]",
+      "elk.spacing.componentComponent": 25, // unconnected nodes are individual subgraphs, referred to as named components
+      "elk.layered.spacing.nodeNodeBetweenLayers": 25, // this has effect, but only if there are edges.
+      "elk.edgeLabels.inline": true,
+    },
     children: tables.map(({ name, columns }) => {
       return {
         id: `table_${name}`,
