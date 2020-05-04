@@ -51,3 +51,7 @@
   font-size: 11px;
   color: #969696;
 }
+
+.column:global(.hover) {
+  background-color: #dcdcdc !important;
+}

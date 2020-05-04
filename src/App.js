@@ -151,18 +151,11 @@ function App() {
 
   const [debounceFunction] = useDebouncedCallback((e) => {
     try {
-      //dbParser.feed(e.trim());
-      //console.log(dbParser.results);
-      console.log("===");
-      console.log(parseInput(e.trim() + "\n"));
-
       const parsedShcheme = parseInput(e.trim() + "\n");
 
       /*if (dbParser.results.length === 0) {
         throw "empty";
       }*/
-
-      console.log(parsedShcheme);
       getTableLayout(parsedShcheme);
     } catch (ex) {
       console.log(ex);

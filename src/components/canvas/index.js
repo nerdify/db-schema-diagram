@@ -191,8 +191,11 @@ export default function Canvas() {
     const points = keyBy(columnPoints, "key");
 
     refs.forEach(({ foreign, primary }) => {
-      const colForeign = points[`column_${foreign.table}_${foreign.column}`];
-      const colPrimary = points[`column_${primary.table}_${primary.column}`];
+      const colForeignId = `column_${foreign.table}_${foreign.column}`;
+      const colPrimaryId = `column_${primary.table}_${primary.column}`;
+
+      const colForeign = points[colForeignId];
+      const colPrimary = points[colPrimaryId];
 
       const segments = [
         [colForeign.left, colPrimary.left],
@@ -227,7 +230,13 @@ export default function Canvas() {
         .fill("none");
 
       element.on(["mouseover"], (e) => {
-        console.log(e);
+        document.getElementById(colForeignId).classList.add("hover");
+        document.getElementById(colPrimaryId).classList.add("hover");
+      });
+
+      element.on(["mouseout"], (e) => {
+        document.getElementById(colForeignId).classList.remove("hover");
+        document.getElementById(colPrimaryId).classList.remove("hover");
       });
     });
 
