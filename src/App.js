@@ -4,7 +4,11 @@ import AceEditor from "react-ace";
 import { useDebouncedCallback } from "use-debounce";
 import "./App.css";
 import Canvas from "./components/canvas";
-import { SchemeDBParser, DBDefinitionLexer } from "./grammar/schemeGrammar";
+import {
+  SchemaDBParser,
+  DBDefinitionLexer,
+  schemeDBVisitor,
+} from "./grammar/schemeGrammar";
 import TableDataContext from "./context";
 
 import "./assets/tailwind.generated.css";
@@ -13,103 +17,15 @@ import "ace-builds/src-noconflict/theme-monokai";
 
 import aceGrammar from "./grammar/aceGrammar";
 
-const schemeParser = new SchemeDBParser();
+const schemeParser = new SchemaDBParser();
+const customVisitor = schemeDBVisitor(schemeParser);
 
 const parseInput = (text) => {
   const lexingResult = DBDefinitionLexer.tokenize(text);
   schemeParser.input = lexingResult.tokens;
 
   const result = schemeParser.elements();
-
-  const baseSchemeVisitor = schemeParser.getBaseCstVisitorConstructorWithDefaults();
-  class customVisitor extends baseSchemeVisitor {
-    constructor() {
-      super();
-      this.validateVisitor();
-    }
-
-    elements(ctx) {
-      const result = ctx.list.map((element) => {
-        return this.visit(element);
-      });
-
-      return result;
-    }
-
-    ref(ctx) {
-      return {
-        type: "ref",
-        foreign: {
-          ...this.ref_table_col(ctx.foreign_ref[0].children.ref_table_col[0]),
-        },
-        primary: {
-          ...this.ref_table_col(ctx.primary_ref[0].children.ref_table_col[0]),
-        },
-      };
-    }
-
-    ref_table_col(ctx) {
-      return {
-        table: ctx.children.ref_table[0].children.name[0].image,
-        column: ctx.children.ref_column[0].children.name[0].image,
-      };
-    }
-
-    table(ctx) {
-      const tableName = ctx.open_table[0].children.name[0].image;
-      const columns = ctx.columns[0].children.list.map((column) =>
-        this.visit(column)
-      );
-      return {
-        type: "table",
-        name: tableName,
-        columns: columns,
-      };
-    }
-
-    column(ctx) {
-      const name = this.visit(ctx.column_name);
-      const type = this.visit(ctx.type);
-      const modifiers = this.visit(ctx.modifiers);
-
-      return {
-        name: name,
-        type: type,
-        modifiers: modifiers ?? [],
-      };
-    }
-
-    column_name(ctx) {
-      return ctx.name[0].image;
-    }
-
-    type(ctx) {
-      return ctx.name[0].image;
-    }
-
-    modifiers(ctx) {
-      return ctx.list.map((modifier) => this.visit(modifier));
-    }
-
-    single_modifier(ctx) {
-      if (ctx.primaryKey) {
-        return ctx.primaryKey[0].image;
-      } else if (ctx.notNull) {
-        return ctx.notNull[0].image;
-      } else if (ctx.unique) {
-        return ctx.unique[0].image;
-      }
-
-      return null;
-    }
-  }
-
-  const customVisitorInstance = new customVisitor();
-  const parsetOutput = customVisitorInstance.visit(result);
-
-  console.log("--->");
-  console.log(parsetOutput);
-  console.log("<---");
+  const parsetOutput = customVisitor.visit(result);
 
   if (schemeParser.errors.length > 0) {
     throw new Error("sad sad panda, Parsing errors detected");
