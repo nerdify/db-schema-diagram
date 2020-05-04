@@ -237,7 +237,7 @@ export default function Canvas() {
   return (
     <div
       id="canvas"
-      style={{ minHeight: height, minWidth: width, border: "1px solid red" }}
+      style={{ minHeight: height, minWidth: width }}
       className={styles.canvas}
     >
       <div className={styles.layer} style={{}} id="draggables">

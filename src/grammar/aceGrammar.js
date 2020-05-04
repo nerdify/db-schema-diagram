@@ -21,6 +21,20 @@ export class CustomHighlightRules extends window.ace.acequire(
           next: "columns",
         },
         {
+          token: function (...defs) {
+            return ["support.class", "b", "tablename", "b", "opendef", "b"];
+          },
+          regex: /^(enum)([\s]+)([\w]+)([ ]+)({)([\s]*)$/,
+          next: "start",
+        },
+        {
+          token: function (...defs) {
+            return ["support.class", "b"];
+          },
+          regex: /^(Ref)(.*)$/,
+          next: "start",
+        },
+        {
           caseInsensitive: true,
         },
       ],
