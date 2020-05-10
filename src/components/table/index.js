@@ -18,7 +18,7 @@ export default function Table({ name, columns }) {
           </tr>
         </thead>
         <tbody>
-          {columns.map(column => {
+          {columns.map((column) => {
             return (
               <tr key={`${name}_${column.name}`}>
                 <td>

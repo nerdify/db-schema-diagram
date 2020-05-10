@@ -1,8 +1,6 @@
 .tableContainer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 100;
+  width: 175px;
+  overflow: hidden;
 }
 
 .tableContainer table {
@@ -20,13 +18,13 @@
 }
 
 .tableName {
-  padding: 7px 5px;
+  padding: 6px;
   display: block;
   width: 100%;
   text-align: center;
   box-sizing: border-box;
   font-weight: bold;
-  font-size: 15px;
+  font-size: 12px;
 }
 
 .column {
@@ -35,7 +33,7 @@
   justify-content: space-between;
 
   width: 100%;
-  padding: 7px;
+  padding: 5px;
   padding-left: 10px;
   box-sizing: border-box;
   border-bottom: 1px solid #cbcbcb;
@@ -45,12 +43,15 @@
 
 .columnName {
   color: #4a4a4a;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 500;
 }
 
 .columnType {
-  font-size: 13px;
+  font-size: 11px;
   color: #969696;
-  margin-left: 65px;
+}
+
+.column:global(.hover) {
+  background-color: #e0e0e0 !important;
 }
