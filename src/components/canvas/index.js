@@ -1,6 +1,6 @@
-import React, {useEffect, useRef, useContext} from 'react'
+import React, {useContext, useEffect} from 'react'
 import {keyBy} from 'lodash'
-import Draggable, {DraggableCore} from 'react-draggable' // Both at the same time
+import Draggable from 'react-draggable' // Both at the same time
 import TableDataContext from '../../context'
 import Graph from 'node-dijkstra'
 
@@ -243,7 +243,7 @@ export default function Canvas() {
     })
 
     //console.log(refs);
-  }, [columnPoints])
+  }, [columnPoints, refs])
 
   return (
     <div

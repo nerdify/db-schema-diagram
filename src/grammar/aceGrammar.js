@@ -43,14 +43,14 @@ export class CustomHighlightRules extends window.ace.acequire(
           token: function (...defs) {
             return ['b', 'colname', 'b', 'string', 'b', 'modifiers']
           },
-          regex: /^([\s]*)([\w_]+)([\s]+)([\w\d\(\)]+)([\s]*)([\[[\w\s,]+\]]*)$/,
+          regex: /^([\s]*)([\w_]+)([\s]+)([\w\d()]+)([\s]*)([[[\w\s,]+\]]*)$/,
           next: 'columns',
         },
         {
           token: function (...defs) {
             return ['b', 'colname', 'b', 'string']
           },
-          regex: /^([\s]*)([\w_]+)([\s]+)([\w\d\(\)]+)$/,
+          regex: /^([\s]*)([\w_]+)([\s]+)([\w\d()]+)$/,
           next: 'columns',
         },
         {

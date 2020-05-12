@@ -19,7 +19,7 @@ const unique = createToken({name: 'unique', pattern: /unique/})
 const name = createToken({name: 'name', pattern: /[\w]{2,}(\(\d+\))?/})
 
 const NL = createToken({name: 'NL', pattern: /[\n]+/})
-const GT = createToken({name: 'GT', pattern: /\>/})
+const GT = createToken({name: 'GT', pattern: />/})
 const DOT = createToken({name: 'DOT', pattern: /\./})
 const WS = createToken({
   name: 'WS',

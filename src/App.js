@@ -106,13 +106,13 @@ const tableDataReducer = (state, action) => {
         height: action.height,
         ...state,
       }
-      break
+
     case 'set':
       return {
         ...state,
         ...action.data,
       }
-      break
+
     case 'update':
       const updatedTables = state.tables.map((table) => {
         if (table.id === action.tableId) {
@@ -126,10 +126,9 @@ const tableDataReducer = (state, action) => {
         ...state,
         tables: updatedTables,
       }
-      break
+
     default:
       return state
-      break
   }
 }
 
