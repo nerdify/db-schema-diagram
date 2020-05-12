@@ -1,5 +1,12 @@
 {
   "presets": [
     "react-app"
-  ]
+  ],
+  "env": {
+    "development": {
+      "plugins": [
+        "react-refresh/babel"
+      ]
+    }
+  }
 }
