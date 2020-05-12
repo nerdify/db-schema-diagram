@@ -188,61 +188,61 @@ export default function Canvas() {
   }, [tables])
 
   useEffect(() => {
-    const points = keyBy(columnPoints, 'key')
+    if (columnPoints.length > 0) {
+      const points = keyBy(columnPoints, 'key')
 
-    refs.forEach(({foreign, primary}) => {
-      const colForeignId = `column_${foreign.table}_${foreign.column}`
-      const colPrimaryId = `column_${primary.table}_${primary.column}`
+      refs.forEach(({foreign, primary}) => {
+        const colForeignId = `column_${foreign.table}_${foreign.column}`
+        const colPrimaryId = `column_${primary.table}_${primary.column}`
 
-      const colForeign = points[colForeignId]
-      const colPrimary = points[colPrimaryId]
+        const colForeign = points[colForeignId]
+        const colPrimary = points[colPrimaryId]
 
-      const segments = [
-        [colForeign.left, colPrimary.left],
-        [colForeign.left, colPrimary.right],
-        [colForeign.right, colPrimary.left],
-        [colForeign.right, colPrimary.right],
-      ].sort((segmentA, segmentB) => {
-        return distance(segmentA) - distance(segmentB)
+        const segments = [
+          [colForeign.left, colPrimary.left],
+          [colForeign.left, colPrimary.right],
+          [colForeign.right, colPrimary.left],
+          [colForeign.right, colPrimary.right],
+        ].sort((segmentA, segmentB) => {
+          return distance(segmentA) - distance(segmentB)
+        })
+
+        const shortest = segments[0]
+        const from = shortest[0]
+        const to = shortest[1]
+
+        const path = getPath(
+          from,
+          to,
+          `canvas`,
+          `table_${foreign.table}`,
+          `table_${primary.table}`,
+          draw
+        )
+
+        path.push(['M', from.x, from.y])
+        path.push(['L', colForeign.center.x, colForeign.center.y])
+        path.push(['M', to.x, to.y])
+        path.push(['L', colPrimary.center.x, colPrimary.center.y])
+
+        const element = draw.current
+          .path(ArrToSvgPath(path))
+          .stroke({color: '#cbcbcb', width: 2})
+          .fill('none')
+
+        element.on(['mouseover'], (e) => {
+          element.stroke({color: '#7e7e7e', width: 2})
+          document.getElementById(colForeignId).classList.add('hover')
+          document.getElementById(colPrimaryId).classList.add('hover')
+        })
+
+        element.on(['mouseout'], (e) => {
+          element.stroke({color: '#cbcbcb', width: 2})
+          document.getElementById(colForeignId).classList.remove('hover')
+          document.getElementById(colPrimaryId).classList.remove('hover')
+        })
       })
-
-      const shortest = segments[0]
-      const from = shortest[0]
-      const to = shortest[1]
-
-      const path = getPath(
-        from,
-        to,
-        `canvas`,
-        `table_${foreign.table}`,
-        `table_${primary.table}`,
-        draw
-      )
-
-      path.push(['M', from.x, from.y])
-      path.push(['L', colForeign.center.x, colForeign.center.y])
-      path.push(['M', to.x, to.y])
-      path.push(['L', colPrimary.center.x, colPrimary.center.y])
-
-      const element = draw.current
-        .path(ArrToSvgPath(path))
-        .stroke({color: '#cbcbcb', width: 2})
-        .fill('none')
-
-      element.on(['mouseover'], (e) => {
-        element.stroke({color: '#7e7e7e', width: 2})
-        document.getElementById(colForeignId).classList.add('hover')
-        document.getElementById(colPrimaryId).classList.add('hover')
-      })
-
-      element.on(['mouseout'], (e) => {
-        element.stroke({color: '#cbcbcb', width: 2})
-        document.getElementById(colForeignId).classList.remove('hover')
-        document.getElementById(colPrimaryId).classList.remove('hover')
-      })
-    })
-
-    //console.log(refs);
+    }
   }, [columnPoints, refs])
 
   return (

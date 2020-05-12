@@ -192,7 +192,6 @@ const tableDataReducer = (state, action) => {
         ...state,
         width: action.width,
         height: action.height,
-        ...state,
       }
 
     case 'set':
@@ -235,6 +234,7 @@ function Home() {
         getSchemaData(schema_id).then((response) => {
           const schema = response.data.getSchema.schema
           if (schema) {
+            editorValue.current = schema
             aceComponent.current.editor.getSession().setValue(schema, -1)
           }
         })
@@ -252,8 +252,8 @@ function Home() {
   const [debounceFunction] = useDebouncedCallback((e) => {
     try {
       const schema = e.trim() + '\n'
-      const parsedShcheme = parseInput(schema)
-      getTableLayout(parsedShcheme).then((response) => {
+      const parsedScheme = parseInput(schema)
+      getTableLayout(parsedScheme).then((response) => {
         dispatch({type: 'set', data: response})
       })
 
