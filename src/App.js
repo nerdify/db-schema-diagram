@@ -1,9 +1,18 @@
 import React from "react";
 import ELK from "elkjs/lib/elk.bundled.js";
 import AceEditor from "react-ace";
+import uuid from "uuid";
 import { useDebouncedCallback } from "use-debounce";
 import "./App.css";
 import Canvas from "./components/canvas";
+import ApolloClient, { gql } from "apollo-boost";
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  useParams,
+  useHistory,
+} from "react-router-dom";
 import {
   SchemaDBParser,
   DBDefinitionLexer,
@@ -16,6 +25,65 @@ import "./assets/tailwind.generated.css";
 import "ace-builds/src-noconflict/theme-monokai";
 
 import aceGrammar from "./grammar/aceGrammar";
+
+const client = new ApolloClient({
+  uri:
+    "https://k4emdgbstjgufjmo75arzjoxti.appsync-api.us-east-1.amazonaws.com/graphql",
+  headers: {
+    "x-api-key": "da2-6hkc4wdow5et3hufzeq7nmuuye",
+  },
+});
+
+const createSchema = async (id) => {
+  return client.mutate({
+    mutation: gql`
+      mutation createSchema($input: CreateSchemaInput!) {
+        createSchema(input: $input) {
+          id
+        }
+      }
+    `,
+    variables: {
+      input: {
+        id: id,
+      },
+    },
+  });
+};
+
+const setRemoteSchema = (id, schema) => {
+  return client.mutate({
+    mutation: gql`
+      mutation updateSchema($input: UpdateSchemaInput!) {
+          updateSchema(input: $input) {
+          id
+        }
+      }
+    `,
+    variables: {
+      input: {
+        id: id,
+        schema: schema
+      },
+    },
+  });
+};
+
+const getSchemaData = (id) => {
+    return client.query({
+        query: gql`
+            query getSchema($id: String!) {
+                getSchema(id: $id) {
+                    id
+                    schema
+                }
+            }
+        `,
+        variables: {
+            id: id,
+        },
+    });
+};
 
 const schemeParser = new SchemaDBParser();
 const customVisitor = schemeDBVisitor(schemeParser);
@@ -35,6 +103,7 @@ const parseInput = (text) => {
 };
 
 const tableDataEncoded = {
+  globalId: null,
   width: 0,
   height: 0,
   tables: [],
@@ -98,13 +167,31 @@ const arrangeItems = async (tables, refs) => {
   };
 };
 
+const getTableLayout = async (data) => {
+  const tables = data.filter((item) => {
+    return item.type === "table";
+  });
+
+  const refs = data.filter((item) => {
+    return item.type === "ref";
+  });
+
+  return arrangeItems(tables, refs);
+};
+
 const tableDataReducer = (state, action) => {
   switch (action.type) {
+    case "setGlobalId":
+      return {
+          ...state,
+          globalId: action.globalId,
+      };
+      break;
     case "setLayout":
       return {
+        ...state,
         width: action.width,
         height: action.height,
-        ...state,
       };
       break;
     case "set":
@@ -133,41 +220,50 @@ const tableDataReducer = (state, action) => {
   }
 };
 
-function App() {
+function Home() {
   const aceComponent = React.useRef(null);
   const editorValue = React.useRef("");
-
-  const getTableLayout = (data) => {
-    const tables = data.filter((item) => {
-      return item.type === "table";
-    });
-
-    const refs = data.filter((item) => {
-      return item.type === "ref";
-    });
-
-    arrangeItems(tables, refs).then((response) => {
-      dispatch({ type: "set", data: response });
-    });
-  };
+  const { schema_id } = useParams();
+  const history = useHistory();
 
   const [state, dispatch] = React.useReducer(
     tableDataReducer,
     tableDataEncoded
   );
 
+  React.useEffect(() => {
+      if (schema_id) {
+          dispatch({ type: "setGlobalId", globalId: schema_id });
+          getSchemaData(schema_id).then((response) => {
+              const schema = response.data.getSchema.schema;
+              dispatch({ type: "set", data: {schema: schema}});
+              aceComponent.current.editor.getSession().setValue(schema, -1);
+          });
+    } else {
+      const globalId = uuid();
+
+      createSchema(globalId).then(() => {
+          dispatch({ type: "setGlobalId", globalId: globalId });
+          history.push(`/${globalId}`);
+      });
+    }
+  }, [schema_id, aceComponent]);
+
   const [debounceFunction] = useDebouncedCallback((e) => {
     try {
-      const parsedShcheme = parseInput(e.trim() + "\n");
+        const schema = e.trim() + "\n";
+       const parsedShcheme = parseInput(schema);
+       getTableLayout(parsedShcheme).then((response) => {
+            dispatch({ type: "set", data: response });
+        });
 
-      /*if (dbParser.results.length === 0) {
-        throw "empty";
-      }*/
-      getTableLayout(parsedShcheme);
+        if (state.globalId) {
+          setRemoteSchema(state.globalId, schema)
+        }
     } catch (ex) {
       console.log(ex);
     }
-  }, 1000);
+  }, 300);
 
   React.useEffect(() => {
     const customGrammar = new aceGrammar();
@@ -202,6 +298,18 @@ function App() {
         </div>
       </div>
     </div>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <Switch>
+        <Route exact path="/:schema_id?">
+          <Home />
+        </Route>
+      </Switch>
+    </Router>
   );
 }
 
