@@ -173,29 +173,27 @@ function App() {
   }, [aceComponent])
 
   return (
-    <div className="App">
-      <div className="flex bg-gray-300 pt-1 w-full">
-        <div className="pr-1" style={{height: '100%', width: '250px'}}>
-          <AceEditor
-            ref={aceComponent}
-            value={editorValue.current}
-            mode="text"
-            theme="monokai"
-            width="100%"
-            height="100%"
-            onChange={(e) => {
-              editorValue.current = e
-              debounceFunction(e)
-            }}
-            name="UNIQUE_ID_OF_DIV"
-            editorProps={{$blockScrolling: true}}
-          />
-        </div>
-        <div className="flex-1 bg-white overflow-scroll shadow-inner">
-          <TableDataContext.Provider value={{state, dispatch}}>
-            <Canvas />
-          </TableDataContext.Provider>
-        </div>
+    <div className="flex bg-gray-300 h-screen pt-1 w-screen">
+      <div className="pr-1" style={{height: '100%', width: '250px'}}>
+        <AceEditor
+          ref={aceComponent}
+          value={editorValue.current}
+          mode="text"
+          theme="monokai"
+          width="100%"
+          height="100%"
+          onChange={(e) => {
+            editorValue.current = e
+            debounceFunction(e)
+          }}
+          name="UNIQUE_ID_OF_DIV"
+          editorProps={{$blockScrolling: true}}
+        />
+      </div>
+      <div className="flex-1 bg-white overflow-scroll shadow-inner">
+        <TableDataContext.Provider value={{state, dispatch}}>
+          <Canvas />
+        </TableDataContext.Provider>
       </div>
     </div>
   )
