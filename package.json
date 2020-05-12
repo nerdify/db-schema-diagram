@@ -34,12 +34,13 @@
   },
   "scripts": {
     "build:tailwind": "tailwindcss build src/assets/tailwind.css -o src/assets/tailwind.generated.css",
-    "prestart": "npm run build:tailwind",
-    "prebuild": "npm run build:tailwind",
-    "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "format": "prettier --write \"**/*.{js,jsx,json,md}\"",
+    "prebuild": "npm run build:tailwind",
+    "prestart": "npm run build:tailwind",
+    "start": "react-scripts start",
+    "test": "react-scripts test"
   },
   "browserslist": {
     "production": [
