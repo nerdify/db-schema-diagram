@@ -2,7 +2,6 @@ import React from "react";
 import ELK from "elkjs/lib/elk.bundled.js";
 import AceEditor from "react-ace";
 import { useDebouncedCallback } from "use-debounce";
-import "./App.css";
 import Canvas from "./components/canvas";
 import {
   SchemaDBParser,
