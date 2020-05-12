@@ -1,44 +1,44 @@
-import React, { useEffect, useRef, useContext } from "react";
-import { keyBy } from "lodash";
-import Draggable, { DraggableCore } from "react-draggable"; // Both at the same time
-import TableDataContext from "../../context";
-import Graph from "node-dijkstra";
+import React, {useContext, useEffect} from 'react'
+import {keyBy} from 'lodash'
+import Draggable from 'react-draggable' // Both at the same time
+import TableDataContext from '../../context'
+import Graph from 'node-dijkstra'
 
-import { SVG } from "@svgdotjs/svg.js";
+import {SVG} from '@svgdotjs/svg.js'
 
-import Table from "../table/";
+import Table from '../table/'
 
-import styles from "./styles.module.css";
+import styles from './styles.module.css'
 
 const isPointInsideTable = ([x, y], tableId, containerId, draw) => {
   const parentRect = document
     .getElementById(containerId)
-    .getBoundingClientRect();
+    .getBoundingClientRect()
 
-  const tableRect = document.getElementById(tableId).getBoundingClientRect();
+  const tableRect = document.getElementById(tableId).getBoundingClientRect()
 
-  const tableRelX = tableRect.x - parentRect.x - 10;
-  const tableRelY = tableRect.y - parentRect.y;
+  const tableRelX = tableRect.x - parentRect.x - 10
+  const tableRelY = tableRect.y - parentRect.y
 
-  const width = tableRect.width + 20;
-  const height = tableRect.height;
+  const width = tableRect.width + 20
+  const height = tableRect.height
 
   const isIn =
     x >= tableRelX &&
     x <= tableRelX + width &&
     y >= tableRelY &&
-    y <= tableRelY + height;
+    y <= tableRelY + height
 
   //draw.current.rect(width, height).fill("#afa").move(tableRelX, tableRelY);
 
-  return isIn;
-};
+  return isIn
+}
 
 const getPath = (from, to, canvasId, tableAId, tableBId, draw = null) => {
   const genGrid = (from, to, columns, rows) => {
-    const points = {};
-    const deltaX = (to.x - from.x) / columns;
-    const deltaY = (to.y - from.y) / rows;
+    const points = {}
+    const deltaX = (to.x - from.x) / columns
+    const deltaY = (to.y - from.y) / rows
 
     for (let i = 0; i <= rows; i++) {
       for (let j = 0; j <= columns; j++) {
@@ -46,114 +46,114 @@ const getPath = (from, to, canvasId, tableAId, tableBId, draw = null) => {
           x: from.x + deltaX * j,
           y: from.y + deltaY * i,
           connections: {},
-        };
+        }
 
         if (j < columns) {
-          node.connections[`p${i}${j + 1}`] = 10;
+          node.connections[`p${i}${j + 1}`] = 10
         }
 
         if (i < rows) {
-          node.connections[`p${i + 1}${j}`] = 10;
+          node.connections[`p${i + 1}${j}`] = 10
         }
 
-        points[`p${i}${j}`] = node;
+        points[`p${i}${j}`] = node
       }
     }
 
-    return points;
-  };
+    return points
+  }
 
-  const cols = 4;
-  const rows = 4;
-  const points = genGrid(from, to, cols, rows);
+  const cols = 4
+  const rows = 4
+  const points = genGrid(from, to, cols, rows)
 
   points[`p${0}${0}`].connections[
     `p${0}${2}`
-  ] = 1; /*TODO. look for non hardcoded way */
-  points[`p${0}${2}`].connections[`p${4}${2}`] = 1;
-  points[`p${4}${2}`].connections[`p${4}${4}`] = 1;
-  points[`p${0}${2}`].connections[`p${4}${2}`] = 1;
+  ] = 1 /*TODO. look for non hardcoded way */
+  points[`p${0}${2}`].connections[`p${4}${2}`] = 1
+  points[`p${4}${2}`].connections[`p${4}${4}`] = 1
+  points[`p${0}${2}`].connections[`p${4}${2}`] = 1
 
-  points[`p${0}${0}`].connections[`p${0}${4}`] = 5;
-  points[`p${0}${4}`].connections[`p${4}${4}`] = 5;
+  points[`p${0}${0}`].connections[`p${0}${4}`] = 5
+  points[`p${0}${4}`].connections[`p${4}${4}`] = 5
 
-  points[`p${0}${0}`].connections[`p${4}${0}`] = 5;
-  points[`p${4}${0}`].connections[`p${4}${4}`] = 5;
+  points[`p${0}${0}`].connections[`p${4}${0}`] = 5
+  points[`p${4}${0}`].connections[`p${4}${4}`] = 5
 
-  const route = new Graph();
+  const route = new Graph()
 
   Object.entries(points).forEach(([key, p]) => {
     //draw.current.circle(4).move(p.x, p.y).fill("#a00");
-    if (key !== "to") {
-      route.addNode(key, p.connections);
+    if (key !== 'to') {
+      route.addNode(key, p.connections)
     }
-  });
+  })
 
   Object.entries(points).forEach(([key, p]) => {
-    if (key !== "to") {
+    if (key !== 'to') {
       if (
         isPointInsideTable([p.x, p.y], tableAId, canvasId, draw) ||
         isPointInsideTable([p.x, p.y], tableBId, canvasId, draw)
       ) {
-        route.removeNode(key);
+        route.removeNode(key)
       }
     }
-  });
+  })
 
-  const sPath = route.path(`p${0}${0}`, `p${cols}${rows}`);
+  const sPath = route.path(`p${0}${0}`, `p${cols}${rows}`)
 
   if (!sPath) {
     return [
-      ["M", from.x, from.y],
-      ["L", to.x, to.y],
-    ];
+      ['M', from.x, from.y],
+      ['L', to.x, to.y],
+    ]
   }
 
   return sPath.map((p, i) => {
-    if (i === 0) return ["M", points[p].x, points[p].y];
-    return ["L", points[p].x, points[p].y];
-  });
-};
+    if (i === 0) return ['M', points[p].x, points[p].y]
+    return ['L', points[p].x, points[p].y]
+  })
+}
 
 const ArrToSvgPath = (arr) => {
-  return arr.flat().join(" ");
-};
+  return arr.flat().join(' ')
+}
 
 const distance = ([pointA, pointB]) => {
-  const a = pointA.x - pointB.x;
-  const b = pointA.y - pointB.y;
+  const a = pointA.x - pointB.x
+  const b = pointA.y - pointB.y
 
-  return Math.sqrt(a * a + b * b);
-};
+  return Math.sqrt(a * a + b * b)
+}
 
 export default function Canvas() {
-  const tablesDataContext = useContext(TableDataContext);
-  const tables = tablesDataContext.state.tables;
-  const refs = tablesDataContext.state.refs;
-  const width = tablesDataContext.state.width;
-  const height = tablesDataContext.state.height;
-  const [columnPoints, setColumnPoints] = React.useState([]);
-  const draw = React.useRef(null);
+  const tablesDataContext = useContext(TableDataContext)
+  const tables = tablesDataContext.state.tables
+  const refs = tablesDataContext.state.refs
+  const width = tablesDataContext.state.width
+  const height = tablesDataContext.state.height
+  const [columnPoints, setColumnPoints] = React.useState([])
+  const draw = React.useRef(null)
 
   useEffect(() => {
-    draw.current = SVG().addTo("#draggables").size("100%", "100%");
-  }, []);
+    draw.current = SVG().addTo('#draggables').size('100%', '100%')
+  }, [])
 
   useEffect(() => {
     const columns = tables.flatMap((table) => {
       return table.columns.map((column) => {
-        const key = `column_${table.name}_${column.name}`;
-        const el = document.getElementById(key);
-        const parent = document.getElementById("canvas");
+        const key = `column_${table.name}_${column.name}`
+        const el = document.getElementById(key)
+        const parent = document.getElementById('canvas')
 
-        const parentX = window.scrollX + parent.getBoundingClientRect().left;
-        const parentY = window.scrollY + parent.getBoundingClientRect().top;
+        const parentX = window.scrollX + parent.getBoundingClientRect().left
+        const parentY = window.scrollY + parent.getBoundingClientRect().top
 
-        const elX = window.scrollX + el.getBoundingClientRect().left;
-        const elY = window.scrollY + el.getBoundingClientRect().top;
+        const elX = window.scrollX + el.getBoundingClientRect().left
+        const elY = window.scrollY + el.getBoundingClientRect().top
 
-        const x = Math.ceil(elX - parentX + 87);
-        const y = Math.ceil(elY - parentY + 10);
+        const x = Math.ceil(elX - parentX + 87)
+        const y = Math.ceil(elY - parentY + 10)
 
         /*
         draw.current
@@ -170,32 +170,32 @@ export default function Canvas() {
           name: column.name,
           table: table.name,
           key,
-          center: { x, y },
-          left: { x: x - 100, y },
+          center: {x, y},
+          left: {x: x - 100, y},
           right: {
             x: x + 100,
             y,
           },
-        };
-      });
-    });
+        }
+      })
+    })
 
-    setColumnPoints(columns);
+    setColumnPoints(columns)
 
     return () => {
-      draw.current.clear();
-    };
-  }, [tables]);
+      draw.current.clear()
+    }
+  }, [tables])
 
   useEffect(() => {
-    const points = keyBy(columnPoints, "key");
+    const points = keyBy(columnPoints, 'key')
 
-    refs.forEach(({ foreign, primary }) => {
-      const colForeignId = `column_${foreign.table}_${foreign.column}`;
-      const colPrimaryId = `column_${primary.table}_${primary.column}`;
+    refs.forEach(({foreign, primary}) => {
+      const colForeignId = `column_${foreign.table}_${foreign.column}`
+      const colPrimaryId = `column_${primary.table}_${primary.column}`
 
-      const colForeign = points[colForeignId];
-      const colPrimary = points[colPrimaryId];
+      const colForeign = points[colForeignId]
+      const colPrimary = points[colPrimaryId]
 
       const segments = [
         [colForeign.left, colPrimary.left],
@@ -203,12 +203,12 @@ export default function Canvas() {
         [colForeign.right, colPrimary.left],
         [colForeign.right, colPrimary.right],
       ].sort((segmentA, segmentB) => {
-        return distance(segmentA) - distance(segmentB);
-      });
+        return distance(segmentA) - distance(segmentB)
+      })
 
-      const shortest = segments[0];
-      const from = shortest[0];
-      const to = shortest[1];
+      const shortest = segments[0]
+      const from = shortest[0]
+      const to = shortest[1]
 
       const path = getPath(
         from,
@@ -217,38 +217,38 @@ export default function Canvas() {
         `table_${foreign.table}`,
         `table_${primary.table}`,
         draw
-      );
+      )
 
-      path.push(["M", from.x, from.y]);
-      path.push(["L", colForeign.center.x, colForeign.center.y]);
-      path.push(["M", to.x, to.y]);
-      path.push(["L", colPrimary.center.x, colPrimary.center.y]);
+      path.push(['M', from.x, from.y])
+      path.push(['L', colForeign.center.x, colForeign.center.y])
+      path.push(['M', to.x, to.y])
+      path.push(['L', colPrimary.center.x, colPrimary.center.y])
 
       const element = draw.current
         .path(ArrToSvgPath(path))
-        .stroke({ color: "#cbcbcb", width: 2 })
-        .fill("none");
+        .stroke({color: '#cbcbcb', width: 2})
+        .fill('none')
 
-      element.on(["mouseover"], (e) => {
-        element.stroke({ color: "#7e7e7e", width: 2 });
-        document.getElementById(colForeignId).classList.add("hover");
-        document.getElementById(colPrimaryId).classList.add("hover");
-      });
+      element.on(['mouseover'], (e) => {
+        element.stroke({color: '#7e7e7e', width: 2})
+        document.getElementById(colForeignId).classList.add('hover')
+        document.getElementById(colPrimaryId).classList.add('hover')
+      })
 
-      element.on(["mouseout"], (e) => {
-        element.stroke({ color: "#cbcbcb", width: 2 });
-        document.getElementById(colForeignId).classList.remove("hover");
-        document.getElementById(colPrimaryId).classList.remove("hover");
-      });
-    });
+      element.on(['mouseout'], (e) => {
+        element.stroke({color: '#cbcbcb', width: 2})
+        document.getElementById(colForeignId).classList.remove('hover')
+        document.getElementById(colPrimaryId).classList.remove('hover')
+      })
+    })
 
     //console.log(refs);
-  }, [columnPoints]);
+  }, [columnPoints, refs])
 
   return (
     <div
       id="canvas"
-      style={{ minHeight: height, minWidth: width }}
+      style={{minHeight: height, minWidth: width}}
       className={styles.canvas}
     >
       <div className={styles.layer} style={{}} id="draggables">
@@ -258,30 +258,30 @@ export default function Canvas() {
               <Draggable
                 bounds="parent"
                 key={`table_${table.name}`}
-                defaultPosition={{ x: 0, y: 0 }}
+                defaultPosition={{x: 0, y: 0}}
                 handle=".handle"
-                position={{ x: table.x, y: table.y }}
+                position={{x: table.x, y: table.y}}
                 onStart={(e) => {}}
                 onDrag={(e, data) => {
                   tablesDataContext.dispatch({
                     tableId: `table_${table.name}`,
-                    type: "update",
+                    type: 'update',
                     event: e,
                     data,
-                  });
+                  })
                 }}
                 onStop={() => {}}
               >
                 <div
-                  style={{ position: "absolute", top: 0, left: 0 }}
+                  style={{position: 'absolute', top: 0, left: 0}}
                   className="handle"
                 >
                   <Table id={`table_${table.name}`} {...table} />
                 </div>
               </Draggable>
-            );
+            )
           })}
       </div>
     </div>
-  );
+  )
 }

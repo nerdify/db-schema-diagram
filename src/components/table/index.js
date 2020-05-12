@@ -1,11 +1,11 @@
-import React from "react";
-import styles from "./styles.module.css";
+import React from 'react'
+import styles from './styles.module.css'
 
-export default function Table({ name, columns }) {
-  const getType = ({ type, size = null }) => {
-    const sizeDefinition = size ? `(${size})` : "";
-    return `${type} ${sizeDefinition}`;
-  };
+export default function Table({name, columns}) {
+  const getType = ({type, size = null}) => {
+    const sizeDefinition = size ? `(${size})` : ''
+    return `${type} ${sizeDefinition}`
+  }
 
   return (
     <div id={`table_${name}`} className={styles.tableContainer}>
@@ -33,10 +33,10 @@ export default function Table({ name, columns }) {
                   </div>
                 </td>
               </tr>
-            );
+            )
           })}
         </tbody>
       </table>
     </div>
-  );
+  )
 }
