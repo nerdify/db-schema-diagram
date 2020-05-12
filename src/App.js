@@ -229,22 +229,25 @@ function Home() {
   const [state, dispatch] = React.useReducer(tableDataReducer, tableDataEncoded)
 
   React.useEffect(() => {
-    if (schema_id) {
-      dispatch({type: 'setGlobalId', globalId: schema_id})
-      getSchemaData(schema_id).then((response) => {
-        const schema = response.data.getSchema.schema
-        dispatch({type: 'set', data: {schema: schema}})
-        aceComponent.current.editor.getSession().setValue(schema, -1)
-      })
-    } else {
-      const globalId = uuid()
+    if (aceComponent.current) {
+      if (schema_id) {
+        dispatch({type: 'setGlobalId', globalId: schema_id})
+        getSchemaData(schema_id).then((response) => {
+          const schema = response.data.getSchema.schema
+          if (schema) {
+            aceComponent.current.editor.getSession().setValue(schema, -1)
+          }
+        })
+      } else {
+        const globalId = uuid()
 
-      createSchema(globalId).then(() => {
-        dispatch({type: 'setGlobalId', globalId: globalId})
-        history.push(`/${globalId}`)
-      })
+        createSchema(globalId).then(() => {
+          dispatch({type: 'setGlobalId', globalId: globalId})
+          history.push(`/${globalId}`)
+        })
+      }
     }
-  }, [schema_id, aceComponent])
+  }, [schema_id, aceComponent, history])
 
   const [debounceFunction] = useDebouncedCallback((e) => {
     try {
