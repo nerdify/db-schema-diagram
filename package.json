@@ -4,13 +4,13 @@
   "private": true,
   "scripts": {
     "build:tailwind": "tailwindcss build src/assets/tailwind.css -o src/assets/tailwind.generated.css",
-    "build": "react-scripts build",
+    "build": "react-app-rewired build",
     "eject": "react-scripts eject",
     "format": "prettier --write \"**/*.{js,jsx,json,md}\"",
     "prebuild": "npm run build:tailwind",
     "prestart": "npm run build:tailwind",
-    "start": "react-scripts start",
-    "test": "react-scripts test"
+    "start": "react-app-rewired start",
+    "test": "react-app-rewired test"
   },
   "browserslist": {
     "production": [
@@ -56,9 +56,12 @@
     "@testing-library/react": "^10.0.4",
     "@testing-library/user-event": "^10.1.2",
     "babel-preset-mobx": "^2.0.0",
+    "customize-cra": "0.9.1",
     "dagre": "^0.8.5",
     "eslint-config-prettier": "6.11.0",
     "eslint-plugin-prettier": "3.1.3",
-    "prettier": "2.0.5"
+    "prettier": "2.0.5",
+    "react-app-rewired": "2.1.6",
+    "stop-runaway-react-effects": "2.0.0"
   }
 }

@@ -1,3 +1,5 @@
 {
-  "presets": ["mobx"]
+  "presets": [
+    "react-app"
+  ]
 }
