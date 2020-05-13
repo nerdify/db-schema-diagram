@@ -2,6 +2,7 @@ import React from 'react'
 import ELK from 'elkjs/lib/elk.bundled.js'
 import AceEditor from 'react-ace'
 import uuid from 'uuid'
+import {debounce, keyBy} from 'lodash'
 import {useDebouncedCallback} from 'use-debounce'
 import ApolloClient, {gql} from 'apollo-boost'
 import {
@@ -33,7 +34,7 @@ const client = new ApolloClient({
   uri:
     'https://k4emdgbstjgufjmo75arzjoxti.appsync-api.us-east-1.amazonaws.com/graphql',
   headers: {
-    'x-api-key': 'da2-6hkc4wdow5et3hufzeq7nmuuye',
+    'x-api-key': 'da2-3pw46cpomrgtnkzjmonjiec47i',
   },
 })
 
@@ -79,6 +80,7 @@ const getSchemaData = (id) => {
         getSchema(id: $id) {
           id
           schema
+          graph
         }
       }
     `,
@@ -87,6 +89,24 @@ const getSchemaData = (id) => {
     },
   })
 }
+
+const updateGraph = debounce((id, graph) => {
+  client.mutate({
+    mutation: gql`
+      mutation updateSchema($input: UpdateSchemaInput!) {
+        updateSchema(input: $input) {
+          id
+        }
+      }
+    `,
+    variables: {
+      input: {
+        id: id,
+        graph: graph,
+      },
+    },
+  })
+}, 1000)
 
 const parseInput = (text) => {
   const lexingResult = DBDefinitionLexer.tokenize(text)
@@ -195,9 +215,25 @@ const tableDataReducer = (state, action) => {
       }
 
     case 'set':
+      const previusTables = keyBy(state.tables, 'id')
+
+      const tablesToSet = action.data.tables.map((table) => {
+        if (previusTables[table.id]) {
+          return {
+            ...table,
+            x: previusTables[table.id].x,
+            y: previusTables[table.id].y,
+          }
+        }
+
+        return table
+      })
+
+      console.log(tablesToSet)
       return {
         ...state,
-        ...action.data,
+        refs: action.data.refs,
+        tables: tablesToSet,
       }
 
     case 'update':
@@ -208,6 +244,8 @@ const tableDataReducer = (state, action) => {
         }
         return table
       })
+
+      updateGraph(state.globalId, JSON.stringify(updatedTables))
 
       return {
         ...state,
@@ -232,7 +270,8 @@ function Home() {
       if (schema_id) {
         dispatch({type: 'setGlobalId', globalId: schema_id})
         getSchemaData(schema_id).then((response) => {
-          const schema = response.data.getSchema.schema
+          const {schema, graph} = response.data.getSchema
+
           if (schema) {
             editorValue.current = schema
             aceComponent.current.editor.getSession().setValue(schema, -1)
