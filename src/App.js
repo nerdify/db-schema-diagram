@@ -229,7 +229,6 @@ const tableDataReducer = (state, action) => {
         return table
       })
 
-      console.log(tablesToSet)
       return {
         ...state,
         refs: action.data.refs,
@@ -245,7 +244,10 @@ const tableDataReducer = (state, action) => {
         return table
       })
 
-      updateGraph(state.globalId, JSON.stringify(updatedTables))
+      updateGraph(
+        state.globalId,
+        JSON.stringify({tables: updatedTables, refs: state.refs})
+      )
 
       return {
         ...state,
@@ -260,6 +262,7 @@ const tableDataReducer = (state, action) => {
 function Home() {
   const aceComponent = React.useRef(null)
   const editorValue = React.useRef('')
+  const loadCounter = React.useRef(0)
   const {schema_id} = useParams()
   const history = useHistory()
 
@@ -276,6 +279,10 @@ function Home() {
             editorValue.current = schema
             aceComponent.current.editor.getSession().setValue(schema, -1)
           }
+
+          if (graph) {
+            dispatch({type: 'set', data: JSON.parse(graph)})
+          }
         })
       } else {
         const globalId = uuid()
@@ -285,6 +292,7 @@ function Home() {
           history.push(`/${globalId}`)
         })
       }
+      loadCounter.current++
     }
   }, [schema_id, aceComponent, history])
 
@@ -322,8 +330,10 @@ function Home() {
           width="100%"
           height="100%"
           onChange={(e) => {
-            editorValue.current = e
-            debounceFunction(e)
+            if (loadCounter.current > 0) {
+              editorValue.current = e
+              debounceFunction(e)
+            }
           }}
           name="UNIQUE_ID_OF_DIV"
           editorProps={{$blockScrolling: true}}
