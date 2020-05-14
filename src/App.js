@@ -2,7 +2,7 @@ import React from 'react'
 import ELK from 'elkjs/lib/elk.bundled.js'
 import AceEditor from 'react-ace'
 import uuid from 'uuid'
-import {debounce, keyBy} from 'lodash'
+import {debounce, keyBy, uniqBy} from 'lodash'
 import {useDebouncedCallback} from 'use-debounce'
 import ApolloClient, {gql} from 'apollo-boost'
 import {
@@ -215,7 +215,8 @@ const tableDataReducer = (state, action) => {
       }
 
     case 'set':
-      const previusTables = keyBy(state.tables, 'id')
+      const filteredTables = uniqBy(state.tables, 'id')
+      const previusTables = keyBy(filteredTables, 'id')
 
       const tablesToSet = action.data.tables.map((table) => {
         if (previusTables[table.id]) {
