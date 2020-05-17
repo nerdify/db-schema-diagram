@@ -187,16 +187,54 @@ const arrangeItems = async (tables, refs) => {
   }
 }
 
+const mergeTablesCoords = (newTables, prevTables) => {
+  const previusTables = keyBy(newTables, 'id')
+
+  const mergedTables = uniqBy(prevTables, 'id').map((table) => {
+    if (previusTables[table.id]) {
+      return {
+        ...table,
+        x: previusTables[table.id].x,
+        y: previusTables[table.id].y,
+      }
+    }
+
+    return table
+  })
+
+  return mergedTables
+}
+
 const getTableLayout = async (data) => {
   const tables = data.filter((item) => {
     return item.type === 'table'
   })
 
+  const uniqueTables = uniqBy(tables, 'name')
+
+  const availableColumns = uniqueTables
+    .map((table) => {
+      return table.columns.map((column) => {
+        return `${table.name}.${column.name}`
+      })
+    })
+    .flat()
+
   const refs = data.filter((item) => {
     return item.type === 'ref'
   })
 
-  return arrangeItems(tables, refs)
+  const filteredRefs = refs.filter(({foreign, primary}) => {
+    const foreignRef = `${foreign.table}.${foreign.column}`
+    const primaryRef = `${primary.table}.${primary.column}`
+
+    return (
+      availableColumns.includes(foreignRef) &&
+      availableColumns.includes(primaryRef)
+    )
+  })
+
+  return arrangeItems(uniqueTables, filteredRefs)
 }
 
 const tableDataReducer = (state, action) => {
@@ -207,28 +245,8 @@ const tableDataReducer = (state, action) => {
         globalId: action.globalId,
       }
 
-    case 'setLayout':
-      return {
-        ...state,
-        width: action.width,
-        height: action.height,
-      }
-
     case 'set':
-      const filteredTables = uniqBy(state.tables, 'id')
-      const previusTables = keyBy(filteredTables, 'id')
-
-      const tablesToSet = action.data.tables.map((table) => {
-        if (previusTables[table.id]) {
-          return {
-            ...table,
-            x: previusTables[table.id].x,
-            y: previusTables[table.id].y,
-          }
-        }
-
-        return table
-      })
+      const tablesToSet = mergeTablesCoords(state.tables, action.data.tables)
 
       return {
         ...state,
@@ -269,6 +287,22 @@ function Home() {
 
   const [state, dispatch] = React.useReducer(tableDataReducer, tableDataEncoded)
 
+  const [debounceFunction] = useDebouncedCallback((e) => {
+    try {
+      const schema = e.trim() + '\n'
+      const parsedScheme = parseInput(schema)
+      getTableLayout(parsedScheme).then((response) => {
+        dispatch({type: 'set', data: response})
+      })
+
+      if (state.globalId) {
+        setRemoteSchema(state.globalId, schema)
+      }
+    } catch (ex) {
+      console.log(ex)
+    }
+  }, 300)
+
   React.useEffect(() => {
     if (aceComponent.current) {
       if (schema_id) {
@@ -296,22 +330,6 @@ function Home() {
       loadCounter.current++
     }
   }, [schema_id, aceComponent, history])
-
-  const [debounceFunction] = useDebouncedCallback((e) => {
-    try {
-      const schema = e.trim() + '\n'
-      const parsedScheme = parseInput(schema)
-      getTableLayout(parsedScheme).then((response) => {
-        dispatch({type: 'set', data: response})
-      })
-
-      if (state.globalId) {
-        setRemoteSchema(state.globalId, schema)
-      }
-    } catch (ex) {
-      console.log(ex)
-    }
-  }, 300)
 
   React.useEffect(() => {
     const customGrammar = new aceGrammar()
