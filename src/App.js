@@ -4,14 +4,6 @@ import AceEditor from 'react-ace'
 import uuid from 'uuid'
 import {debounce, keyBy, uniqBy} from 'lodash'
 import {useDebouncedCallback} from 'use-debounce'
-import ApolloClient, {gql} from 'apollo-boost'
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  useParams,
-  useHistory,
-} from 'react-router-dom'
 
 import Canvas from './components/canvas'
 import {
@@ -29,84 +21,6 @@ import aceGrammar from './grammar/aceGrammar'
 
 const schemeParser = new SchemaDBParser()
 const customVisitor = schemeDBVisitor(schemeParser)
-
-const client = new ApolloClient({
-  uri:
-    'https://k4emdgbstjgufjmo75arzjoxti.appsync-api.us-east-1.amazonaws.com/graphql',
-  headers: {
-    'x-api-key': 'da2-3pw46cpomrgtnkzjmonjiec47i',
-  },
-})
-
-const createSchema = async (id) => {
-  return client.mutate({
-    mutation: gql`
-      mutation createSchema($input: CreateSchemaInput!) {
-        createSchema(input: $input) {
-          id
-        }
-      }
-    `,
-    variables: {
-      input: {
-        id: id,
-      },
-    },
-  })
-}
-
-const setRemoteSchema = (id, schema) => {
-  return client.mutate({
-    mutation: gql`
-      mutation updateSchema($input: UpdateSchemaInput!) {
-        updateSchema(input: $input) {
-          id
-        }
-      }
-    `,
-    variables: {
-      input: {
-        id: id,
-        schema: schema,
-      },
-    },
-  })
-}
-
-const getSchemaData = (id) => {
-  return client.query({
-    query: gql`
-      query getSchema($id: String!) {
-        getSchema(id: $id) {
-          id
-          schema
-          graph
-        }
-      }
-    `,
-    variables: {
-      id: id,
-    },
-  })
-}
-
-const updateGraph = debounce((id, graph) => {
-  client.mutate({
-    mutation: gql`
-      mutation updateSchema($input: UpdateSchemaInput!) {
-        updateSchema(input: $input) {
-          id
-        }
-      }
-    `,
-    variables: {
-      input: {
-        id: id,
-        graph: graph,
-      },
-    },
-  })
-}, 1000)
 
 const parseInput = (text) => {
   const lexingResult = DBDefinitionLexer.tokenize(text)
@@ -263,11 +177,6 @@ const tableDataReducer = (state, action) => {
         return table
       })
 
-      updateGraph(
-        state.globalId,
-        JSON.stringify({tables: updatedTables, refs: state.refs})
-      )
-
       return {
         ...state,
         tables: updatedTables,
@@ -281,9 +190,6 @@ const tableDataReducer = (state, action) => {
 function Home() {
   const aceComponent = React.useRef(null)
   const editorValue = React.useRef('')
-  const loadCounter = React.useRef(0)
-  const {schema_id} = useParams()
-  const history = useHistory()
 
   const [state, dispatch] = React.useReducer(tableDataReducer, tableDataEncoded)
 
@@ -294,42 +200,10 @@ function Home() {
       getTableLayout(parsedScheme).then((response) => {
         dispatch({type: 'set', data: response})
       })
-
-      if (state.globalId) {
-        setRemoteSchema(state.globalId, schema)
-      }
     } catch (ex) {
       console.log(ex)
     }
   }, 300)
-
-  React.useEffect(() => {
-    if (aceComponent.current) {
-      if (schema_id) {
-        dispatch({type: 'setGlobalId', globalId: schema_id})
-        getSchemaData(schema_id).then((response) => {
-          const {schema, graph} = response.data.getSchema
-
-          if (schema) {
-            editorValue.current = schema
-            aceComponent.current.editor.getSession().setValue(schema, -1)
-          }
-
-          if (graph) {
-            dispatch({type: 'set', data: JSON.parse(graph)})
-          }
-        })
-      } else {
-        const globalId = uuid()
-
-        createSchema(globalId).then(() => {
-          dispatch({type: 'setGlobalId', globalId: globalId})
-          history.push(`/${globalId}`)
-        })
-      }
-      loadCounter.current++
-    }
-  }, [schema_id, aceComponent, history])
 
   React.useEffect(() => {
     const customGrammar = new aceGrammar()
@@ -349,12 +223,10 @@ function Home() {
           width="100%"
           height="100%"
           onChange={(e) => {
-            if (loadCounter.current > 0) {
-              editorValue.current = e
-              debounceFunction(e)
-            }
+            editorValue.current = e
+            debounceFunction(e)
           }}
-          name="UNIQUE_ID_OF_DIV"
+          name="ACE"
           editorProps={{$blockScrolling: true}}
         />
       </div>
@@ -368,15 +240,7 @@ function Home() {
 }
 
 function App() {
-  return (
-    <Router>
-      <Switch>
-        <Route exact path="/:schema_id?">
-          <Home />
-        </Route>
-      </Switch>
-    </Router>
-  )
+  return <Home />
 }
 
 export default App
