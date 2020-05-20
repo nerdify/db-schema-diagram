@@ -7,6 +7,16 @@ const RefDf = createToken({name: 'RefDefinition', pattern: /REF[ ]*:/i})
 
 const lBraket = createToken({name: 'lBraket', pattern: /[ ]*{[ ]*/})
 const rBraket = createToken({name: 'RBraket', pattern: /[ ]*}[ ]*/})
+const commentLine = createToken({
+  name: 'CLine',
+  pattern: /[ ]*\/\/.*\n/,
+  group: Lexer.SKIPPED,
+})
+const comment = createToken({
+  name: 'Comment',
+  pattern: /\/\*[^*]*\*+([^/*][^*]*\*+)*\//,
+  group: Lexer.SKIPPED,
+})
 
 const lKey = createToken({name: 'lKey', pattern: /\[/})
 const rKey = createToken({name: 'rKey', pattern: /\]/})
@@ -28,6 +38,8 @@ const WS = createToken({
 })
 
 const allTokens = [
+  commentLine,
+  comment,
   tableDf,
   RefDf,
   EnumDf,
