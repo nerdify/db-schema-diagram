@@ -4,7 +4,7 @@ dbdiagram.io is an awesome tool, in nerdify we use it a lot. But sometime we wis
 
 # Goals
 
- 1. Create a parser with fully sintax fully compatible con dbdiagram.io [check milestone [ #1](https://github.com/nerdify/db-schema-diagram/milestone/1)]
+ 1. Create a parser with fully syntax fully compatible con dbdiagram.io [check milestone [ #1](https://github.com/nerdify/db-schema-diagram/milestone/1)]
  2. Develop a light component to render ER diagrams
 
 # Sintax
